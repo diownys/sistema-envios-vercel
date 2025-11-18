@@ -1,26 +1,29 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path'; // Importe 'resolve' para facilitar o mapeamento
 
 export default defineConfig({
-    // A propriedade 'root' é opcional, pois o Vercel já usa 'frontend/' como Root Directory.
-    // Se precisar definir a pasta de saída (build) dentro de frontend, use build.outDir.
     build: {
-        // Assegura que a saída final vá para uma pasta 'dist' dentro de 'frontend/'
-        outDir: 'dist', 
+        // outDir: 'dist', // Pode ser removido se você não especificou no deploy
         rollupOptions: {
             input: {
-                // Defina o ponto de entrada principal, que é seu index.html
-                main: 'index.html', 
-                
-                // Se você quiser que o Vite processe seu CSS e JS separadamente,
-                // você listaria eles aqui, mas no seu caso,
-                // como você está usando HTML/CSS/JS simples, o index.html deve ser suficiente.
+                // Use resolve para garantir caminhos absolutos dentro do Root Directory (frontend/)
+                main: resolve(__dirname, 'index.html'),
+                login: resolve(__dirname, 'login.html'), // A PÁGINA QUE ESTÁ FALTANDO
+                admin: resolve(__dirname, 'admin.html'),
+                concluidos: resolve(__dirname, 'concluidos.html'),
+                // ADICIONE AQUI TODAS AS OUTRAS PÁGINAS HTML:
+                conferencia: resolve(__dirname, 'conferencia.html'),
+                dashboard: resolve(__dirname, 'dashboard.html'),
+                'editar-envios': resolve(__dirname, 'editar-envios.html'),
+                'envio-form': resolve(__dirname, 'envio-form.html'),
+                importar: resolve(__dirname, 'importar.html'),
+                relatorios: resolve(__dirname, 'relatorios.html'),
+                romaneio: resolve(__dirname, 'romaneio.html'),
+                'selecao-lote': resolve(__dirname, 'selecao-lote.html'),
+                'conferencia-notas': resolve(__dirname, 'conferencia-notas.html'), 
+                vendas: resolve(__dirname, 'vendas.html'), 
+                // e quaisquer outras...
             }
         }
     },
-    
-    plugins: [
-        // Se você não está usando nenhum plugin (nem Tailwind), esta seção pode ficar vazia.
-        // Se estiver usando Tailwind, mantenha apenas o plugin relacionado.
-        // Se estiver usando o plugin @tailwindcss/vite, ele provavelmente está configurado incorretamente.
-    ]
 });
