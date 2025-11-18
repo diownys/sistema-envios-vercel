@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador e Impressor de Vendas PharmUp</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        /* CSS Básico da PÁGINA DE TESTE (não da impressão) */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 { color: #333; }
+        #busca-container { margin-bottom: 20px; }
+        #codigoVendaInput { font-size: 16px; padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 5px; }
+        button { font-size: 16px; padding: 10px 15px; cursor: pointer; color: white; border: none; border-radius: 5px; margin-left: 5px; }
+        #buscarBtn { background-color: #0070f3; }
+        #imprimirBtn { background-color: #1a7f37; }
+        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        #status { margin-top: 15px; font-size: 1.1em; font-weight: bold; }
+        .sucesso { color: #008a20; }
+        .erro { color: #d93025; }
+        pre { background-color: #2d2d2d; color: #f8f8f2; padding: 20px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; margin-top: 10px; }
+        code { font-family: "Courier New", Courier, monospace; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <h1>Buscador e Impressor de Vendas (PharmUp)</h1>
+
+    <div id="busca-container">
+        <input type="text" id="codigoVendaInput" placeholder="Digite o código da venda (ex: 101152)">
+        <button id="buscarBtn">Buscar</button>
+        <button id="imprimirBtn" disabled>Imprimir</button>
+    </div>
+
+    <div id="status"></div>
+
+    <pre><code id="jsonResultado">Aguardando busca...</code></pre>
+
+    <script>
+        // --- Chaves do Supabase ---
+        const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI';
+        
+        // --- Inicializa o cliente ---
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- Elementos do HTML ---
+        const input = document.getElementById('codigoVendaInput');
+        const buscarBtn = document.getElementById('buscarBtn');
+        const imprimirBtn = document.getElementById('imprimirBtn');
+        const statusEl = document.getElementById('status');
+        const resultadoEl = document.getElementById('jsonResultado');
+
+        // --- Guarda dados da venda buscada ---
+        let dadosVendaAtual = null;
+
+        // --- Event Listeners ---
+        buscarBtn.addEventListener('click', buscarVenda);
+        imprimirBtn.addEventListener('click', imprimirVenda);
+        input.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') buscarVenda();
+        });
+
+        // --- Função BUSCAR VENDA (mantida do primeiro código) ---
+        async function buscarVenda() {
+            const codigo = input.value.trim();
+            if (!codigo) {
+                statusEl.textContent = 'Por favor, digite um código de venda.';
+                statusEl.className = 'erro';
+                dadosVendaAtual = null;
+                imprimirBtn.disabled = true;
+                return;
+            }
+
+            statusEl.textContent = 'Invocando função... ⏳';
+            statusEl.className = '';
+            resultadoEl.textContent = '';
+            buscarBtn.disabled = true;
+            imprimirBtn.disabled = true;
+            dadosVendaAtual = null;
+
+            try {
+                const { data, error } = await supabase.functions.invoke('buscador-vendas', {
+                    body: { codigoVenda: codigo }
+                });
+                if (error) throw error;
+                statusEl.textContent = 'Venda encontrada com sucesso! ✅';
+                statusEl.className = 'sucesso';
+                resultadoEl.textContent = JSON.stringify(data, null, 2);
+                dadosVendaAtual = data;
+                imprimirBtn.disabled = false;
+            } catch (err) {
+                console.error('Erro ao invocar função:', err);
+                const errorMsg = err.context?.error?.message || err.message || JSON.stringify(err, null, 2);
+                statusEl.textContent = `Erro: ${errorMsg}`;
+                statusEl.className = 'erro';
+                resultadoEl.textContent = 'Falha ao buscar dados.';
+            } finally {
+                buscarBtn.disabled = false;
+            }
+        }
+
+        // --- Função GERAR HTML IMPRESSÃO (AJUSTADO PARA O SEGUNDO LAYOUT) ---
+        function gerarHtmlImpressao(dados) {
+            const v = (key) => dados[key] || '';
+            const agora = new Date();
+            const dataHoraAtual = agora.toLocaleDateString('pt-BR') + ', ' + agora.toLocaleTimeString('pt-BR');
+
+            // 1. Lógica do QR Code
+            let qrCodeContent = '';
+            if (dados.itens && dados.itens.length > 0 && dados.itens[0]['ManipulacaoOrdem.Codigo']) {
+                const primeiroCodigo = dados.itens[0]['ManipulacaoOrdem.Codigo'];
+                if (primeiroCodigo && primeiroCodigo !== '0') {
+                    qrCodeContent = `${primeiroCodigo}$M`;
+                }
+            }
+            // OBS: No seu segundo layout, o QR Code é uma imagem estática (Base64) e não um div para ser gerado.
+            // Para manter a funcionalidade de geração de QR Code, manteremos o uso do `qrcode-container` no HTML de impressão.
+
+            let itensHtml = '';
+            if (dados.itens && Array.isArray(dados.itens)) {
+                dados.itens.forEach(item => {
+                    // Mantive os estilos inline de cores e alinhamento do seu PRIMEIRO código
+                    // e usei a estrutura de colunas do SEGUNDO layout.
+                    itensHtml += `
+                        <tr>
+                            <td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">${item['ManipulacaoOrdem.Codigo'] || ''}</td>
+                            <td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">${item['ManipulacaoOrdem.Descricao'] || ''}</td>
+                            <td style="font-size:10px;color:white; background-color:white;text-align:left;"></td>
+                            <td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">${item['ValorUnitario'] || '0,00'}</td>
+                            <td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">${item['ManipulacaoOrdem.DescontoPercentual'] || '0,00'}</td>
+                            <td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">${item['ValorTotal'] || '0,00'}</td>
+                            <td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">${item['ManipulacaoOrdem.TemProdutoRefrigerado'] || ''}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Monta o HTML completo com os estilos e estrutura do SEGUNDO CÓDIGO.
+            return `
+                <!DOCTYPE html>
+                <html lang="pt-br" style="text-align:right;">
+                <head>
+                    <meta charset="utf-8">
+                    <title>Impressão Venda ${v('codigoVenda')}</title>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+                    <style>
+                        @media print { @page { margin: 0; } }
+                        pre { background-color: transparent !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; }
+                        body { font-family: Monospace; margin: 0; padding: 0; }
+                        fieldset { border-width: 0px; page-break-before: always; }
+                        table { width: 100%; border-collapse: collapse; }
+                        td { padding: 4px; }
+                        th { padding: 4px; text-align: left; }
+                        .branco { color: rgba(255, 255, 255, 0); }
+                        table#tableType1 td, table#tableType1 th { border: 1px solid #808080; }
+                        table#tableType2 td { border-bottom: 1px solid #808080; border-top: 1px solid #808080; }
+                        table#tableType2 th { border-bottom: 1px solid #808080; }
+                        table#tableType3 td, table#tableType3 th { border-right: 1px solid #808080; border-left: 1px solid #808080; }
+                        table#tableType4 td, table#tableType4 th { border-top: 1px solid #808080; }
+                        table#tableType5 td, table#tableType5 th { border-bottom: 1px solid #808080; }
+                        /* Estilos para o QR Code (para aparecer igual a uma imagem de 100x100) */
+                        #qrcode-container { height: 100px; width: 100px; }
+                    </style>
+                </head>
+                <body onload="gerarQRCodeEImprimir()">
+                    <fieldset>
+                        
+                        <table id="tableType0">
+                            <tbody>
+                                <tr>
+                                    <th style="text-align:right;font-size: 10px;" colspan="3">${dataHoraAtual}</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table id="tableType0">
+                            <tbody>
+                                <tr>
+                                    <td style="font-size:10px;color:black; background-color:white;text-align:left;">
+                                        ${qrCodeContent ? '<div id="qrcode-container"></div>' : ''}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <table id="tableType0">
+                            <tbody>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Código da venda: ${v('codigoVenda')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Observação: ${v('Observacao')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Vendedor: ${v('Usuario.Nome')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Emissão: ${v('DataAprovacao')}</td></tr>
+                            </tbody>
+                        </table>
+
+                        <table id="tableType0">
+                            <tbody>
+                                <tr><th style="text-align: center; font-size: 10px;" colspan="2">Dados do cliente</th></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Cód Cliente: ${v('Cliente.Id')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Nome: ${v('Cliente.Nome')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">CPF/CNPJ: ${v('Cliente.Cpf') || v('Cliente.Cnpj') || ''}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Celular: ${v('Cliente.Celular')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Telefone: ${v('Cliente.Telefone')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">E-mail: ${v('Cliente.Email')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Endereço: ${v('EnderecoEntrega.Endereco')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Número: ${v('EnderecoEntrega.Numero')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Complemento: ${v('EnderecoEntrega.Complemento')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Bairro: ${v('EnderecoEntrega.Bairro')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Cidade: ${v('EnderecoEntrega.Cidade')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">CEP: ${v('EnderecoEntrega.Cep')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Data: ${v('DataEntrega')}</td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold" colspan="2">Local de Entrega: ${v('LocalEntrega.Descricao')}</td></tr>
+                                <tr><td style="font-size:10px;color:white; background-color:white;text-align:left;" colspan="2">|: </td></tr>
+                            </tbody>
+                        </table>
+                        
+                        <table id="tableType2"> 
+                            <thead>
+                                <tr><th colspan="7" style="font-size: 10px;">Itens</th></tr>
+                                <tr>
+                                    <th style="font-size: 10px;">Ordem </th>
+                                    <th style="font-size: 10px;">Descrição</th>
+                                    <th style="font-size: 10px;"></th>
+                                    <th style="font-size: 10px;">R$ Unit</th>
+                                    <th style="font-size: 10px;">% Dsc</th>
+                                    <th style="font-size: 10px;">R$ Total</th>
+                                    <th style="font-size: 10px;">Tem Produto Refrigerado?</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itensHtml}
+                            </tbody>
+                        </table>
+
+                        <table id="tableType0"> 
+                            <tbody>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Qtde Itens: ${v('QuantidadeTotalItens')}</td><td style="font-size:10px;color:white; background-color:white;text-align:left;">|: </td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Desconto : ${v('DescontoPercentual')}</td><td style="font-size:10px;color:white; background-color:white;text-align:left;">|: </td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Taxa de Entrega: ${v('TaxaEntrega')}</td><td style="font-size:10px;color:white; background-color:white;text-align:left;">|: </td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Valor Venda: ${v('ValorFinal')}</td><td style="font-size:10px;color:white; background-color:white;text-align:left;">|: </td></tr>
+                                <tr><td style="font-size:10px;color:black; background-color:white;text-align:left; font-weight: bold">Observação: ${v('Observacao')}</td><td style="font-size:10px;color:white; background-color:white;text-align:left;">|: </td></tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+
+                    <script>
+                        function gerarQRCodeEImprimir() {
+                            const qrContent = "${qrCodeContent}";
+                            const qrDiv = document.getElementById('qrcode-container');
+                            
+                            if (qrDiv && qrContent) {
+                                try {
+                                    // Aumentei o tamanho do QR Code para 100x100 para corresponder ao estilo do segundo layout
+                                    new QRCode(qrDiv, {
+                                        text: qrContent,
+                                        width: 100,
+                                        height: 100,
+                                        correctLevel : QRCode.CorrectLevel.L
+                                    });
+                                } catch (e) { console.error("Erro QR Code:", e); qrDiv.innerHTML = "Erro QR"; }
+                            }
+                            
+                            // Mantém o timeout para garantir que o QR Code seja renderizado antes da impressão
+                            setTimeout(() => {
+                                try { window.print(); }
+                                catch (e) { console.error("Erro Impressão:", e); alert("Erro ao imprimir."); }
+                            }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+        }
+
+        // --- Função IMPRIMIR VENDA (mantida do primeiro código) ---
+        function imprimirVenda() {
+            if (!dadosVendaAtual) {
+                alert("Nenhum dado de venda para imprimir. Busque uma venda primeiro.");
+                return;
+            }
+            const htmlParaImprimir = gerarHtmlImpressao(dadosVendaAtual);
+            const printWindow = window.open('', '_blank', 'height=600,width=800');
+
+            if (printWindow) {
+                printWindow.document.write(htmlParaImprimir);
+                printWindow.document.close();
+            } else {
+                alert("Não foi possível abrir a janela de impressão. Verifique bloqueador de pop-ups.");
+            }
+        }
+    </script>
+
+</body>
+</html>
