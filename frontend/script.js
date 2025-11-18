@@ -385,7 +385,7 @@ function updateProgressChart(concluidos, pendentes) {
 async function updateMap(destinos) {
     try {
         if (!mapDataCache) {
-            const mapResponse = await fetch('brazil-geojson.json');
+            const mapResponse = await fetch('./brazil-geojson.json');
             if (!mapResponse.ok) throw new Error('Falha ao carregar brazil-geojson.json');
             mapDataCache = await mapResponse.json();
         }
