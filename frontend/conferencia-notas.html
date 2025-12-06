@@ -1,358 +1,394 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conferência de Notas Fiscais</title>
-    <style>
-        body { font-family: sans-serif; background-color: #f4f4f9; margin: 0; padding: 1rem; }
-        .container { 
-            background: white; 
-            padding: 2rem; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-            width: 100%; 
-            max-width: 1400px; 
-            margin: 0 auto;
-        }
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 1.5rem; 
-            flex-wrap: wrap; 
-        }
-        .header h1 { color: #333; margin: 0; font-size: 1.8rem; }
-        .header-actions { display: flex; gap: 1rem; }
-        .btn {
-            background-color: #007bff;
-            color: white;
-            padding: 0.8rem 1.2rem;
-            text-decoration: none;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .btn-print { background-color: #17a2b8; }
-        .btn-back { background-color: #6c757d; }
-        .btn:hover { background-color: #0056b3; }
-        
-        .controls { 
-            display: flex; 
-            gap: 1rem; 
-            margin-bottom: 1.5rem; 
-            flex-wrap: wrap; 
-        }
-        .controls select, .controls input {
-            padding: 0.8rem;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-        }
-        .controls select { flex-basis: 300px; }
-        .controls input { flex-basis: 300px; flex-grow: 1; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conferência de Notas Fiscais</title>
+    
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script> 
+  
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; margin: 0; padding: 1rem; }
+        .container { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 1400px; 
+            margin: 0 auto;
+        }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.5rem; 
+            flex-wrap: wrap; 
+        }
+        .header h1 { color: #333; margin: 0; font-size: 1.8rem; }
+        .header-actions { display: flex; gap: 1rem; }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 0.8rem 1.2rem;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-print { background-color: #17a2b8; }
+        .btn-back { background-color: #6c757d; }
+        .btn:hover { background-color: #0056b3; }
+        
+        .controls { 
+            display: flex; 
+            gap: 1rem; 
+            margin-bottom: 1.5rem; 
+            flex-wrap: wrap; 
+        }
+        .controls select, .controls input {
+            padding: 0.8rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+        .controls select { flex-basis: 300px; }
+        .controls input { flex-basis: 300px; flex-grow: 1; }
 
-        #status-message {
-            background: #fff3cd;
-            color: #856404;
-            padding: 1rem;
-            border-radius: 5px;
-            text-align: center;
-            margin-top: 1rem;
-            display: none; 
-        }
+        #status-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 1rem;
+            display: none; 
+        }
 
-        .table-container { background: white; border-radius: 8px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; }
+        .table-container { background: white; border-radius: 8px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; }
 
-        .status-cell { font-weight: bold; }
-        .status-ok { color: #28a745; }
-        .status-error { color: #dc3545; }
-        .status-checking { color: #6c757d; }
+        .status-cell { font-weight: bold; }
+        .status-ok { color: #28a745; }
+        .status-error { color: #dc3545; }
+        .status-checking { color: #6c757d; }
 
-        @media print {
-            body { background-color: #fff; padding: 0; margin: 0; }
-            .header, .controls, .btn-back {
-                display: none !important; 
-            }
-            .container {
-                box-shadow: none; border: none; padding: 0;
-                width: 100%; max-width: 100%;
-            }
-            .table-container { box-shadow: none; border-radius: 0; }
-            table { font-size: 10pt; }
-            th, td { padding: 5px; }
-            .status-cell {
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
-            }
-        }
-    </style>
+        @media print {
+            body { background-color: #fff; padding: 0; margin: 0; }
+            .header, .controls, .btn-back {
+                display: none !important; 
+            }
+            .container {
+                box-shadow: none; border: none; padding: 0;
+                width: 100%; max-width: 100%;
+            }
+            .table-container { box-shadow: none; border-radius: 0; }
+            table { font-size: 10pt; }
+            th, td { padding: 5px; }
+            .status-cell {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1 id="titulo-janela">Conferência de Notas Fiscais</h1>
-            </div>
-            <div class="header-actions">
-                <a href="index.html" class="btn btn-back">Voltar ao Menu</a>
-                <button id="print-button" class="btn btn-print">Imprimir Lista</button>
-            </div>
-        </div>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 id="titulo-janela">Conferência de Notas Fiscais</h1>
+            </div>
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-back">Voltar ao Menu</a>
+                <button id="print-button" class="btn btn-print">Imprimir Lista</button>
+            </div>
+        </div>
 
-        <div class="controls">
-            <select id="janela-select">
-                <option value="">Carregando janelas de hoje...</option>
-            </select>
-            <input type="text" id="search-input" placeholder="Busque por cliente, cód. venda, nº nota...">
-        </div>
+        <div class="controls">
+            <select id="janela-select">
+                <option value="">Carregando janelas de hoje...</option>
+            </select>
+            <input type="text" id="search-input" placeholder="Busque por cliente, cód. venda, nº nota...">
+        </div>
+        
+        <div id="status-message"></div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Cód. Venda</th>
+                        <th>Status (Envio)</th>
+                        <th>Status NFe</th>
+                        <th>Nº da Nota</th>
+                    </tr>
+                </thead>
+                <tbody id="vendas-table-body">
+                    <tr><td colspan="5" style="text-align: center;">Selecione uma janela para carregar as vendas.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+    // ✅ CORREÇÃO: Inicialização correta via window.supabase
+    const { createClient } = window.supabase;
+    
+    const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI'; 
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let todasAsVendas = []; 
+    let dataStringGlobal = ''; 
+    let startOfDayGlobal = ''; 
+    let endOfDayGlobal = '';   
+
+    const janelaSelect = document.getElementById('janela-select');
+    const searchInput = document.getElementById('search-input');
+    const printButton = document.getElementById('print-button');
+    const tableBody = document.getElementById('vendas-table-body');
+    const statusMessage = document.getElementById('status-message');
+
+    function getYYYYMMDD(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { 
+            window.location.href = '/login.html'; 
+            return; 
+        }
+
+        // ✅ OTIMIZAÇÃO DE DATA: Garantindo a data de hoje (00:00:00 até 23:59:59)
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0); // Zera hora para ser o início do dia
         
-        <div id="status-message"></div>
+        dataStringGlobal = getYYYYMMDD(hoje); 
+        
+        // Calcula o início (hoje 00:00:00.000) e o fim (amanhã 00:00:00.000) no fuso UTC para o filtro do Supabase
+        const startOfDay = new Date(hoje.getTime());
+        const endOfDay = new Date(hoje.getTime());
+        endOfDay.setDate(hoje.getDate() + 1);
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Cód. Venda</th>
-                        <th>Status (Envio)</th>
-                        <th>Status NFe</th>
-                        <th>Nº da Nota</th>
-                    </tr>
-                </thead>
-                <tbody id="vendas-table-body">
-                    <tr><td colspan="5" style="text-align: center;">Selecione uma janela para carregar as vendas.</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+        startOfDayGlobal = startOfDay.toISOString();
+        endOfDayGlobal = endOfDay.toISOString();
 
-<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    
-    const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI'; 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    let todasAsVendas = []; 
-    let dataStringGlobal = ''; 
-    let startOfDayGlobal = ''; 
-    let endOfDayGlobal = '';   
+        await carregarFiltroJanelas(startOfDayGlobal, endOfDayGlobal);
+        setupEventListeners();
+    });
 
-    const janelaSelect = document.getElementById('janela-select');
-    const searchInput = document.getElementById('search-input');
-    const printButton = document.getElementById('print-button');
-    const tableBody = document.getElementById('vendas-table-body');
-    const statusMessage = document.getElementById('status-message');
+    async function carregarFiltroJanelas(startISO, endISO) {
+        try {
+            const { data, error } = await supabase
+                .from('envios')
+                .select('janela_coleta')
+                .gte('created_at', startISO)
+                .lt('created_at', endISO);
+            
+            if (error) throw error;
 
-    function getYYYYMMDD(date) {
-        const yyyy = date.getFullYear();
-        const mm = String(date.getMonth() + 1).padStart(2, '0');
-        const dd = String(date.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    }
+            const janelasUnicas = [...new Set(data.map(item => item.janela_coleta || 'Sem Janela'))];
+            janelasUnicas.sort();
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { 
-            window.location.href = '/login.html'; 
-            return; 
+            janelaSelect.innerHTML = '<option value="">-- Selecione uma Janela --</option>';
+            if (janelasUnicas.length === 0) {
+                janelaSelect.innerHTML = '<option value="">Nenhuma janela hoje</option>';
+                return;
+            }
+
+            janelasUnicas.forEach(janela => {
+                janelaSelect.innerHTML += `<option value="${janela}">${janela}</option>`;
+            });
+
+        } catch (error) {
+            janelaSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+            showStatusMessage(`Erro ao carregar janelas: ${error.message}`, 'error');
+        }
+    }
+
+    function setupEventListeners() {
+        janelaSelect.addEventListener('change', () => {
+            const janelaSelecionada = janelaSelect.value;
+            if (janelaSelecionada) {
+                // Passamos os dados globais para a função de carregamento
+                carregarVendasEVerificarNotas(janelaSelecionada, startOfDayGlobal, endOfDayGlobal, dataStringGlobal);
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Selecione uma janela para carregar as vendas.</td></tr>';
+                todasAsVendas = [];
+            }
+        });
+
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase();
+            const vendasFiltradas = todasAsVendas.filter(venda => 
+                (venda.cliente_nome?.toLowerCase().includes(query)) ||
+                (venda.codigo_venda?.toLowerCase().includes(query)) ||
+                (venda.nfe_status?.toLowerCase().includes(query)) ||
+                (venda.nfe_numero?.toLowerCase().includes(query))
+            );
+            
+            renderTable(vendasFiltradas);
+            // Repopula os dados NFe existentes (status, número) após a filtragem de busca
+            repopularNFeData(vendasFiltradas);
+        });
+
+        printButton.addEventListener('click', () => {
+            const dataFormatada = new Date(dataStringGlobal + 'T12:00:00').toLocaleDateString('pt-BR');
+            document.title = `Conferencia NFe - ${janelaSelect.value} - ${dataFormatada}`;
+            window.print();
+            document.title = "Conferência de Notas Fiscais";
+        });
+    }
+
+    async function carregarVendasEVerificarNotas(janela, startDate, endDate, dataBusca) {
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Carregando vendas...</td></tr>'; 
+        try {
+            const { data, error } = await supabase.functions.invoke('get-vendas-por-janela', { 
+                body: { 
+                    janela: janela,
+                    start_date: startDate, 
+                    end_date: endDate 
+                } 
+            });
+            if (error) throw error;
+            
+            if (data && data.error) throw new Error(data.error);
+            
+            todasAsVendas = data.vendas || [];
+            
+            if (todasAsVendas.length === 0) {
+                 tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma venda encontrada para esta janela.</td></tr>'; 
+                 return;
+            }
+            
+            renderTable(todasAsVendas);
+            // Inicia a verificação assíncrona da nota fiscal
+            await verificarNotas(todasAsVendas, dataBusca);
+
+        } catch (error) {
+            tableBody.innerHTML = `<tr><td colspan="5">Erro ao carregar vendas: ${error.message}</td></tr>`; 
+            showStatusMessage(`Falha ao carregar vendas: ${error.message}`, 'error');
+        }
+    }
+
+    function renderTable(vendasParaRenderizar) {
+        tableBody.innerHTML = '';
+        if (vendasParaRenderizar.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma venda encontrada para o filtro atual.</td></tr>'; 
+            return;
+        }
+        vendasParaRenderizar.forEach(venda => {
+            // Garante que a célula NFe inicial seja "..." e "status-checking"
+            const nfeStatusClass = venda.nfe_status === 'Emitida' ? 'status-ok' : (venda.nfe_status === 'Não Encontrada' ? 'status-error' : 'status-checking');
+            const nfeStatusText = venda.nfe_status || '...';
+            const nfeNumeroText = venda.nfe_numero || '...';
+
+            tableBody.innerHTML += `
+                <tr id="venda-row-${venda.id}">
+                    <td>${venda.cliente_nome || 'N/A'}</td>
+                    <td>${venda.codigo_venda || 'N/A'}</td>
+                    <td>${venda.status || 'Pendente'}</td>
+                    <td class="status-cell ${nfeStatusClass}" id="status-nfe-${venda.id}">${nfeStatusText}</td>
+                    <td id="num-nfe-${venda.id}">${nfeNumeroText}</td>
+                </tr>
+            `;
+        });
+    }
+
+    /**
+     * =================================================================
+     * FUNÇÃO DE VERIFICAÇÃO DE NOTAS (Lógica de 90 dias mantida)
+     * =================================================================
+     */
+    async function verificarNotas(listaDeVendas, dataBuscaHoje) {
+        // 1. Definir a data final (hoje, formato YYYY-MM-DD)
+        const dataFim = dataBuscaHoje; 
+        
+        // 2. Definir a data inicial (90 dias atrás)
+        const hoje = new Date(dataBuscaHoje + 'T12:00:00'); 
+        const dataInicio = new Date(hoje);
+        dataInicio.setDate(hoje.getDate() - 90);
+        
+        // 3. Re-formatar a data inicial para "YYYY-MM-DD"
+        const dataInicioStr = getYYYYMMDD(dataInicio);
+        
+        showStatusMessage('Verificando status das Notas Fiscais...', 'info');
+
+        const promessas = listaDeVendas.map(venda => {
+            return supabase.functions.invoke('get-nota-details', {
+                body: {
+                    codigoVenda: venda.codigo_venda,
+                    de: dataInicioStr, // Data 90 dias atrás
+                    ate: dataFim        // Data de hoje
+                }
+            })
+            .then(({ data: nfeData, error: funcError }) => {
+                if (funcError || (nfeData && nfeData.error)) {
+                    venda.nfe_status = 'Não Encontrada'; 
+                } else {
+                    venda.nfe_status = 'Emitida';
+                    venda.nfe_numero = nfeData.numero;
+                }
+                // Atualiza a linha na tabela imediatamente após a verificação
+                repopularNFeData([venda]); 
+                return { success: true }; // Retorna para o Promise.allSettled
+            })
+            .catch(e => {
+                venda.nfe_status = 'Erro na busca';
+                repopularNFeData([venda]);
+                console.error(`Erro ao buscar nota para ${venda.codigo_venda}:`, e);
+                return { success: false, reason: e }; // Retorna para o Promise.allSettled
+            });
+        });
+        
+        await Promise.allSettled(promessas);
+        showStatusMessage('Verificação de Notas Fiscais concluída.', 'info');
+    }
+
+    function repopularNFeData(listaDeVendas) {
+        listaDeVendas.forEach(venda => {
+            const statusCell = document.getElementById(`status-nfe-${venda.id}`);
+            const numCell = document.getElementById(`num-nfe-${venda.id}`);
+            if (!statusCell || !numCell) return; 
+
+            let statusText = venda.nfe_status;
+            let statusClass = 'status-checking';
+
+            if (venda.nfe_status === 'Emitida') {
+                statusClass = 'status-ok';
+                numCell.innerText = venda.nfe_numero || 'N/D';
+            } else if (venda.nfe_status === 'Não Encontrada' || venda.nfe_status === 'Erro na busca') {
+                statusClass = 'status-error';
+                numCell.innerText = '0';
+            }
+            
+            statusCell.innerText = statusText;
+            statusCell.className = `status-cell ${statusClass}`;
+        });
+    }
+
+    function showStatusMessage(message, type = 'info') {
+        statusMessage.textContent = message;
+        statusMessage.style.display = 'block';
+        statusMessage.style.backgroundColor = type === 'error' ? '#f8d7da' : '#fff3cd';
+        statusMessage.style.color = type === 'error' ? '#721c24' : '#856404';
+        
+        // Esconde a mensagem de status após 5 segundos, se não for um erro
+        if (type !== 'error') {
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
         }
-
-        const hoje = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
-        dataStringGlobal = getYYYYMMDD(hoje); 
-
-        const startOfDay = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 0, 0, 0);
-        const endOfDay = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1, 0, 0, 0);
-        
-        startOfDayGlobal = startOfDay.toISOString();
-        endOfDayGlobal = endOfDay.toISOString();
-
-        await carregarFiltroJanelas(startOfDayGlobal, endOfDayGlobal);
-        setupEventListeners();
-    });
-
-    async function carregarFiltroJanelas(startISO, endISO) {
-        try {
-            const { data, error } = await supabase
-                .from('envios')
-                .select('janela_coleta')
-                .gte('created_at', startISO)
-                .lt('created_at', endISO);
-            
-            if (error) throw error;
-
-            const janelasUnicas = [...new Set(data.map(item => item.janela_coleta || 'Sem Janela'))];
-            janelasUnicas.sort();
-
-            janelaSelect.innerHTML = '<option value="">-- Selecione uma Janela --</option>';
-            if (janelasUnicas.length === 0) {
-                janelaSelect.innerHTML = '<option value="">Nenhuma janela hoje</option>';
-                return;
-            }
-
-            janelasUnicas.forEach(janela => {
-                janelaSelect.innerHTML += `<option value="${janela}">${janela}</option>`;
-            });
-
-        } catch (error) {
-            janelaSelect.innerHTML = '<option value="">Erro ao carregar</option>';
-            showStatusMessage(`Erro ao carregar janelas: ${error.message}`, 'error');
-        }
-    }
-
-    function setupEventListeners() {
-        janelaSelect.addEventListener('change', () => {
-            const janelaSelecionada = janelaSelect.value;
-            if (janelaSelecionada) {
-                // Passamos a data de "hoje" (dataStringGlobal) para a função
-                carregarVendasEVerificarNotas(janelaSelecionada, startOfDayGlobal, endOfDayGlobal, dataStringGlobal);
-            } else {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Selecione uma janela para carregar as vendas.</td></tr>';
-                todasAsVendas = [];
-            }
-        });
-
-        searchInput.addEventListener('input', () => {
-            const query = searchInput.value.toLowerCase();
-            const vendasFiltradas = todasAsVendas.filter(venda => 
-                (venda.cliente_nome?.toLowerCase().includes(query)) ||
-                (venda.codigo_venda?.toLowerCase().includes(query)) ||
-                (venda.nfe_status?.toLowerCase().includes(query)) ||
-                (venda.nfe_numero?.toLowerCase().includes(query))
-            );
-            
-            renderTable(vendasFiltradas);
-            repopularNFeData(vendasFiltradas);
-        });
-
-        printButton.addEventListener('click', () => {
-            const dataFormatada = new Date(dataStringGlobal + 'T12:00:00').toLocaleDateString('pt-BR');
-            document.title = `Conferencia NFe - ${janelaSelect.value} - ${dataFormatada}`;
-            window.print();
-            document.title = "Conferência de Notas Fiscais";
-        });
-    }
-
-    async function carregarVendasEVerificarNotas(janela, startDate, endDate, dataBusca) {
-        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Carregando vendas...</td></tr>'; 
-        try {
-            const { data, error } = await supabase.functions.invoke('get-vendas-por-janela', { 
-                body: { 
-                    janela: janela,
-                    start_date: startDate, 
-                    end_date: endDate 
-                } 
-            });
-            if (error) throw error;
-            todasAsVendas = data.vendas;
-            
-            if (todasAsVendas.length === 0) {
-                 tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma venda encontrada para esta janela.</td></tr>'; 
-                 return;
-            }
-            
-            renderTable(todasAsVendas);
-            // Passamos a data de "hoje" (dataBusca) para a função de verificação
-            await verificarNotas(todasAsVendas, dataBusca);
-
-        } catch (error) {
-            tableBody.innerHTML = `<tr><td colspan="5">Erro ao carregar vendas: ${error.message}</td></tr>`; 
-        }
-    }
-
-    function renderTable(vendasParaRenderizar) {
-        tableBody.innerHTML = '';
-        if (vendasParaRenderizar.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma venda encontrada para o filtro atual.</td></tr>'; 
-            return;
-        }
-        vendasParaRenderizar.forEach(venda => {
-            tableBody.innerHTML += `
-                <tr id="venda-row-${venda.id}">
-                    <td>${venda.cliente_nome || 'N/A'}</td>
-                    <td>${venda.codigo_venda || 'N/A'}</td>
-                    <td>${venda.status || 'Pendente'}</td>
-                    <td class="status-cell status-checking" id="status-nfe-${venda.id}">...</td>
-                    <td id="num-nfe-${venda.id}">...</td>
-                </tr>
-            `;
-        });
-    }
-
-    /**
-     * =================================================================
-     * FUNÇÃO MODIFICADA
-     * =================================================================
-     */
-    async function verificarNotas(listaDeVendas, dataBuscaHoje) {
-        
-        // --- INÍCIO DA MUDANÇA ---
-        // 1. Definir a data final (hoje)
-        const dataFim = dataBuscaHoje; 
-        
-        // 2. Definir a data inicial (90 dias atrás)
-        // Usamos T12:00 para garantir que o new Date() não pule o dia
-        const hoje = new Date(dataBuscaHoje + 'T12:00:00'); 
-        const dataInicio = new Date(hoje);
-        dataInicio.setDate(hoje.getDate() - 90); // 90 dias no passado
-        
-        // 3. Re-formatar a data inicial para "YYYY-MM-DD"
-        // A função getYYYYMMDD() já existe no topo do script
-        const dataInicioStr = getYYYYMMDD(dataInicio);
-        // --- FIM DA MUDANÇA ---
-
-        const promessas = listaDeVendas.map(venda => {
-            return supabase.functions.invoke('get-nota-details', {
-                body: {
-                    codigoVenda: venda.codigo_venda,
-                    de: dataInicioStr, // <-- MUDADO
-                    ate: dataFim        // <-- MUDADO
-                }
-            })
-            .then(({ data: nfeData, error: funcError }) => {
-                if (funcError || nfeData.error) {
-                    venda.nfe_status = 'Não Encontrada'; 
-                } else {
-                    venda.nfe_status = 'Emitida';
-                    venda.nfe_numero = nfeData.numero;
-                }
-                repopularNFeData([venda]); 
-            });
-        });
-        await Promise.allSettled(promessas);
-    }
-    // =================================================================
-    // FIM DA MODIFICAÇÃO
-    // =================================================================
-
-    function repopularNFeData(listaDeVendas) {
-        listaDeVendas.forEach(venda => {
-            const statusCell = document.getElementById(`status-nfe-${venda.id}`);
-            if (!statusCell) return; 
-
-            if (venda.nfe_status === 'Emitida') {
-                statusCell.innerText = 'Emitida';
-                statusCell.className = 'status-cell status-ok';
-                document.getElementById(`num-nfe-${venda.id}`).innerText = venda.nfe_numero || 'N/D';
-            } else if (venda.nfe_status === 'Não Encontrada') {
-                statusCell.innerText = 'Não Encontrada';
-                statusCell.className = 'status-cell status-error';
-            }
-        });
-    }
-
-    function showStatusMessage(message, type = 'info') {
-        statusMessage.textContent = message;
-        statusMessage.style.display = 'block';
-        statusMessage.style.backgroundColor = type === 'error' ? '#f8d7da' : '#fff3cd';
-        statusMessage.style.color = type === 'error' ? '#721c24' : '#856404';
-    }
+    }
 
 </script>
 </body>
