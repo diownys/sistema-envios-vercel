@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel do Administrador</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script> 
+  <script src="./supabase_global.js"></script>
+
   <style>
+    /* ... (CSS MANTIDO INTACTO) ... */
     body { font-family: sans-serif; background-color: #f4f4f9; margin: 0; padding: 1rem; }
     .container { max-width: 1200px; margin: auto; }
     .header { margin-bottom: 2rem; }
@@ -115,10 +120,9 @@
     </div>
   </div>
 
-  <script type="module">
-    // --- IMPORTAÇÃO CENTRALIZADA (CORREÇÃO APLICADA) ---
-    import { supabase } from './supabaseClient.js';
-    // --- FIM DA CORREÇÃO ---
+  <script>
+    // ✅ CORREÇÃO: O objeto 'supabase' agora está disponível globalmente graças a supabase_global.js
+    // A lógica de inicialização local (const supabase = createClient...) FOI REMOVIDA.
 
     const ITEMS_PER_PAGE = 10;
     let currentPage = 0;
@@ -162,6 +166,7 @@
     // --- Lógica de Acesso e Logs ---
 
     async function checkAdminAccess() {
+        // O objeto 'supabase' é acessado globalmente aqui.
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
