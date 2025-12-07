@@ -1,209 +1,171 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vendas Concluídas</title>
-  
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script> 
-  
-  <style>
-    body { font-family: sans-serif; background-color: #f4f4f9; margin: 0; padding: 1rem; }
-    .header { margin-bottom: 1rem; } .header a { color: #007bff; text-decoration: none; font-weight: bold; }
-    h1 { color: #333; }
-    .controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; align-items: center; }
-    .controls .search-group { flex-grow: 1; min-width: 200px; }
-    .controls .date-group { display: flex; gap: 0.5rem; align-items: center; }
-    .controls input { padding: 0.8rem; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem; }
-    .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
-    .actions-cell { display: flex; gap: 0.5rem; }
-    .btn { padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px; font-size: 0.9rem; border: none; cursor: pointer; color: white; }
-    .btn-reprint { background-color: #17a2b8; }
-    .btn-revert { background-color: #ffc107; color: #212529; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendas Concluídas</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script> 
+    
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; margin: 0; padding: 1rem; }
+        .container { max-width: 1200px; margin: auto; }
+        .header { margin-bottom: 1.5rem; }
+        .header a { color: #007bff; text-decoration: none; font-weight: bold; }
+        h1 { color: #333; }
+        .vendas-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .vendas-table th, .vendas-table td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; }
+        .vendas-table th { background-color: #e9ecef; }
+        .loading-status, .no-data { text-align: center; color: #555; padding: 2rem; }
+        .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1rem; }
+        .pagination-controls button { padding: 0.5rem 1rem; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <a href="/index.html">&larr; Voltar ao Menu</a>
-    <h1>Vendas Concluídas</h1>
-  </div>
+    <div class="container">
+        <div class="header">
+            <a href="/index.html">← Voltar ao Dashboard</a>
+        </div>
+        <h1>Vendas Concluídas (Confirmadas)</h1>
 
-  <div class="controls">
-    <div class="search-group">
-      <input type="text" id="search-input" placeholder="Busque por cliente ou cód. venda..." style="width: 100%;">
-    </div>
-    <div class="date-group">
-      <label for="start-date-input">De:</label>
-      <input type="date" id="start-date-input">
-      <label for="end-date-input">Até:</label>
-      <input type="date" id="end-date-input">
-    </div>
-  </div>
+        <div id="loading-status" class="loading-status">Carregando vendas...</div>
+        
+        <table class="vendas-table" id="vendas-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Data Coleta</th>
+                    <th>Janela</th>
+                    <th>Cód. Venda</th>
+                    <th>Cliente</th>
+                    <th>Vendedor</th>
+                </tr>
+            </thead>
+            <tbody id="vendas-tbody">
+                </tbody>
+        </table>
 
-  <div class="table-container">
-    <table>
-      <thead><tr><th>Cliente</th><th>Cód. Venda</th><th>Volumes</th><th>Confirmado em</th><th>Ações</th></tr></thead>
-      <tbody id="concluidos-table-body"></tbody>
-    </table>
-  </div>
+        <div class="pagination-controls">
+            <button id="prev-page" disabled>← Anterior</button>
+            <span id="page-info">Página 1 de 1</span>
+            <button id="next-page" disabled>Próxima →</button>
+        </div>
+    </div>
 
 <script>
-    // ✅ Inicialização correta via window.supabase
-    const { createClient } = window.supabase;
+    // ✅ INICIALIZAÇÃO LOCAL (COMO NOS DEMAIS ARQUIVOS)
+    const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI';
     
-    // CHAVES SUPABASE MANTIDAS
-    const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI';
+    const { createClient } = window.supabase;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ----------------------------------------------------------------------
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    let concluidosData = [];
-    const tableBody = document.getElementById('concluidos-table-body');
-    const searchInput = document.getElementById('search-input');
-    const startDateInput = document.getElementById('start-date-input');
-    const endDateInput = document.getElementById('end-date-input');
+    const ITEMS_PER_PAGE = 20;
+    let currentPage = 0;
+    let totalPages = 1;
 
-    // Função com a correção de fuso horário
-    function aplicarFiltros() {
-        const query = searchInput.value.toLowerCase();
-        
-        const startDateString = startDateInput.value;
-        const endDateString = endDateInput.value;
-        
-        if (!startDateString || !endDateString) {
-            renderTable([]); 
-            return;
-        }
+    const vendasTbody = document.getElementById('vendas-tbody');
+    const loadingStatus = document.getElementById('loading-status');
+    const vendasTable = document.getElementById('vendas-table');
+    const prevPageButton = document.getElementById('prev-page');
+    const nextPageButton = document.getElementById('next-page');
+    const pageInfoSpan = document.getElementById('page-info');
 
-        // Constrói as datas de forma segura (00:00:00 do início e 23:59:59 do fim)
-        const [startYear, startMonth, startDay] = startDateString.split('-').map(Number);
-        const startDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0, 0);
+    function formatDateTime(isoString) {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        return date.toLocaleDateString('pt-BR');
+    }
 
-        const [endYear, endMonth, endDay] = endDateString.split('-').map(Number);
-        const endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59, 999);
+    function updatePaginationControls() {
+        pageInfoSpan.textContent = `Página ${currentPage + 1} de ${totalPages}`;
+        prevPageButton.disabled = currentPage === 0;
+        nextPageButton.disabled = currentPage >= totalPages - 1;
+    }
 
-        const vendasFiltradas = concluidosData.filter(venda => {
-            const textMatch = (venda.cliente_nome?.toLowerCase().includes(query)) ||
-                              (venda.codigo_venda?.toLowerCase().includes(query));
-            
-            const vendaDate = new Date(venda.updated_at);
-            const dateMatch = vendaDate >= startDate && vendaDate <= endDate;
+    async function fetchVendasConcluidas() {
+        loadingStatus.textContent = "Carregando vendas...";
+        vendasTable.style.display = 'none';
 
-            return textMatch && dateMatch;
-        });
+        try {
+            // 1. Contar o total de vendas concluídas (status = 'confirmado')
+            let countQuery = supabase
+                .from('vendas')
+                .select('*', { count: 'exact', head: true })
+                .eq('status_coleta', 'confirmado');
+            
+            const { count, error: countError } = await countQuery;
+            
+            if (countError) throw countError;
+            
+            totalPages = Math.ceil(count / ITEMS_PER_PAGE);
+            if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
+            
+            updatePaginationControls();
 
-        renderTable(vendasFiltradas);
-    }
+            // 2. Buscar as vendas da página atual
+            const from = currentPage * ITEMS_PER_PAGE;
+            const to = from + ITEMS_PER_PAGE - 1;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        // 1. Checagem de Autenticação
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { window.location.href = '/login.html'; return; }
-        
-        // 2. Define datas padrão (hoje) e carrega dados
-        const hoje = new Date().toISOString().split('T')[0];
-        startDateInput.value = hoje;
-        endDateInput.value = hoje;
-        
-        await carregarConcluidos();
-        
-        // 3. Listeners de Filtro
-        searchInput.addEventListener('input', aplicarFiltros);
-        startDateInput.addEventListener('change', aplicarFiltros);
-        endDateInput.addEventListener('change', aplicarFiltros);
-        
-        // 4. Listener para Reverter/Reimprimir é adicionado por último, para garantir que as funções existam.
-        setupActionListeners();
-    });
-    
-    function renderTable(dadosParaRenderizar) {
-        tableBody.innerHTML = '';
-        if (dadosParaRenderizar.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5">Nenhuma venda encontrada para o filtro atual.</td></tr>';
-            return;
-        }
-        dadosParaRenderizar.forEach(venda => {
-            tableBody.innerHTML += `
-                <tr>
-                    <td>${venda.cliente_nome || 'N/A'}</td>
-                    <td>${venda.codigo_venda || 'N/A'}</td>
-                    <td>${venda.volumes || '1'}</td>
-                    <td>${new Date(venda.updated_at).toLocaleString('pt-BR')}</td>
-                    <td class="actions-cell">
-                        <button class="btn btn-revert" data-venda-id="${venda.id}">Reverter</button>
-                        <button class="btn btn-reprint" data-venda-id="${venda.id}">Reimprimir</button>
-                    </td>
-                </tr>
-            `;
-        });
-    }
+            const { data: vendas, error } = await supabase
+                .from('vendas')
+                .select('data_coleta, janela_coleta, cod_venda, cliente, vendedor')
+                .eq('status_coleta', 'confirmado')
+                .order('data_coleta', { ascending: false })
+                .order('janela_coleta', { ascending: true })
+                .range(from, to);
 
-    async function carregarConcluidos() {
-        tableBody.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
-        try {
-            // Chama a Edge Function para buscar vendas concluídas
-            const { data, error } = await supabase.functions.invoke('get-concluidos');
-            if (error) throw error;
-            
-            // Se a Edge Function retornar um objeto de erro, lance-o
-            if (data && data.error) throw new Error(data.error);
-            
-            concluidosData = data.concluidos || [];
-            aplicarFiltros();
-        } catch (error) {
-            tableBody.innerHTML = `<tr><td colspan="5">Erro ao carregar vendas: ${error.message}</td></tr>`;
-            console.error("Erro na Edge Function 'get-concluidos':", error);
-        }
-    }
+            if (error) throw error;
 
-    function setupActionListeners() {
-        tableBody.addEventListener('click', async (event) => {
-            const target = event.target;
-            const vendaId = target.dataset.vendaId;
+            vendasTbody.innerHTML = '';
+            if (vendas.length === 0) {
+                loadingStatus.textContent = "Nenhuma venda concluída encontrada.";
+            } else {
+                vendas.forEach(venda => {
+                    const row = vendasTbody.insertRow();
+                    row.insertCell().textContent = formatDateTime(venda.data_coleta);
+                    row.insertCell().textContent = venda.janela_coleta;
+                    row.insertCell().textContent = venda.cod_venda;
+                    row.insertCell().textContent = venda.cliente;
+                    row.insertCell().textContent = venda.vendedor;
+                });
+                loadingStatus.style.display = 'none';
+                vendasTable.style.display = 'table';
+            }
 
-            if (!vendaId) return;
+        } catch (error) {
+            console.error("Erro ao buscar vendas concluídas:", error.message);
+            loadingStatus.textContent = `Erro ao carregar vendas: ${error.message}. Verifique o Console (F12).`;
+            vendasTable.style.display = 'none';
+        }
+    }
 
-            if (target.matches('.btn-revert')) {
-                if (confirm('Tem certeza que deseja reverter esta venda para "Pendente"?')) {
-                    target.textContent = 'Revertendo...';
-                    const { data, error } = await supabase.functions.invoke('reverter-envio', { body: { envio_id: parseInt(vendaId) } });
-                    
-                    if (error || (data && data.error)) {
-                        alert(`Erro ao reverter: ${error?.message || data.error}`);
-                        target.textContent = 'Reverter';
-                    } else {
-                        // Remove a venda da lista local e renderiza novamente
-                        concluidosData = concluidosData.filter(v => v.id != vendaId);
-                        aplicarFiltros(); 
-                    }
-                }
-            }
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Verifica Autenticação
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            window.location.href = '/login.html';
+            return;
+        }
 
-            if (target.matches('.btn-reprint')) {
-                target.textContent = 'Gerando...';
-                try {
-                    // Edge Function para reimpressão
-                    const { data, error } = await supabase.functions.invoke('gerar-etiqueta', { body: { envio_id: parseInt(vendaId) }, responseType: 'text' });
-                    if (error) throw error;
-                    
-                    if (typeof data === 'string') {
-                        const printWindow = window.open('', '_blank');
-                        printWindow.document.write(data);
-                        printWindow.document.close();
-                        printWindow.print();
-                    } else {
-                        throw new Error(data?.error || 'A função não retornou o HTML esperado.');
-                    }
-                } catch (error) {
-                    alert(`Erro ao reimprimir: ${error.message}`);
-                } finally {
-                    target.textContent = 'Reimprimir';
-                }
-            }
-        });
-    }
+        // Carrega dados
+        fetchVendasConcluidas();
+
+        // Listeners de Paginação
+        prevPageButton.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                fetchVendasConcluidas();
+            }
+        });
+
+        nextPageButton.addEventListener('click', () => {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                fetchVendasConcluidas();
+            }
+        });
+    });
 </script>
 </body>
 </html>
