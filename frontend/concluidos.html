@@ -53,10 +53,9 @@
     const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI';
 
-    // ✅ Inicialização usando a variável global
+    // Inicialização do cliente Supabase
     const { createClient } = window.supabase;
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    // -------------------------------------------------------------
     
     let concluidosData = [];
     const tableBody = document.getElementById('concluidos-table-body');
@@ -140,8 +139,8 @@
             const { data, error } = await supabase.functions.invoke('get-concluidos');
             if (error) throw error;
             
-            // Tratamento adicional para garantir que o array 'concluidos' exista
-            if (data && data.concluidos) {
+            // Tratamento para garantir que data.concluidos seja um array
+            if (data && data.concluidos && Array.isArray(data.concluidos)) {
                 concluidosData = data.concluidos;
             } else {
                 concluidosData = [];
@@ -149,8 +148,7 @@
             aplicarFiltros();
             
         } catch (error) {
-            // Mensagem para orientar o usuário a corrigir o Edge Function
-            tableBody.innerHTML = `<tr><td colspan="5">**ERRO DE DADOS**: O front-end está OK, mas falhou ao carregar vendas. Isso geralmente significa que o nome da tabela na sua Edge Function **'get-concluidos'** está incorreto (ex: usando 'vendas' em vez de 'venda'). Erro: ${error.message}</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="5">Erro ao carregar vendas: ${error.message}</td></tr>`;
         }
     }
 
