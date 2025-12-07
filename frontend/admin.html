@@ -6,10 +6,8 @@
   <title>Painel do Administrador</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script> 
-  <script src="/supabase_global.js"></script>
 
   <style>
-    /* ... (CSS MANTIDO INTACTO) ... */
     body { font-family: sans-serif; background-color: #f4f4f9; margin: 0; padding: 1rem; }
     .container { max-width: 1200px; margin: auto; }
     .header { margin-bottom: 2rem; }
@@ -121,14 +119,19 @@
   </div>
 
   <script>
-    // ✅ CORREÇÃO: O objeto 'supabase' agora está disponível globalmente graças a supabase_global.js
-    // A lógica de inicialização local (const supabase = createClient...) FOI REMOVIDA.
-
+    // ✅ INICIALIZAÇÃO LOCAL (COMO NO INDEX.HTML)
+    const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI';
+    
+    const { createClient } = window.supabase;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ---------------------------------------------------------------
+    
     const ITEMS_PER_PAGE = 10;
     let currentPage = 0;
     let totalPages = 1;
     let currentSearchTerm = '';
-    let currentUserRole = null; // Para armazenar a role do usuário logado
+    let currentUserRole = null; 
 
     const logTbody = document.getElementById('log-tbody');
     const loadingStatus = document.getElementById('loading-status');
@@ -166,7 +169,6 @@
     // --- Lógica de Acesso e Logs ---
 
     async function checkAdminAccess() {
-        // O objeto 'supabase' é acessado globalmente aqui.
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
@@ -183,7 +185,7 @@
 
         if (error || !profile || profile.role !== 'admin') {
             alert("Acesso negado. Esta página é restrita a administradores.");
-            window.location.href = '/index.html'; // Redireciona para uma página não-admin
+            window.location.href = '/index.html'; 
             return false;
         }
 
@@ -300,16 +302,12 @@
 
             if (authError) throw authError;
 
-            // 2. O RLS deve garantir que a função de criação de profile seja disparada ou 
-            // que um trigger no DB crie o profile. Se não, o admin precisa criar manualmente o profile com a role.
-            // Para garantir, vamos fazer uma chamada de RPC para criar/atualizar o perfil.
-            // NOTE: A role do usuário só pode ser alterada por Admin via RLS ou Trigger no DB.
+            // 2. Tenta atualizar a role. Se houver RLS, pode ser ignorado/feito via trigger.
             const userId = userData.user.id;
             const { error: profileError } = await supabase.from('profiles').update({ role: role }).eq('id', userId);
 
             if (profileError) {
-                // Se falhar, talvez seja por RLS. Apenas logamos.
-                console.warn("Aviso: Falha ao definir a role diretamente. Verifique os triggers de DB.", profileError.message);
+                console.warn("Aviso: Falha ao tentar definir a role. Verifique os triggers de DB.", profileError.message);
             }
             
             createUserStatus.textContent = `Usuário "${email}" criado com sucesso como "${role}".`;
