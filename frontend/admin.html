@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Painel do Administrador</title>
-</head>
-<body>
+### ARQUIVO: admin.html ###
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -22,247 +15,357 @@
     #log-search-input { padding: 0.8rem; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem; width: 300px; }
     .pagination-controls { display: flex; align-items: center; gap: 0.5rem; }
     .pagination-controls button { padding: 0.5rem 1rem; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; }
-    .pagination-controls button:disabled { cursor: not-allowed; opacity: 0.5; }
-    .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow-x: auto; margin-bottom: 2rem; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
-    .form-container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-    .input-group { margin-bottom: 1rem; }
-    input, select, .form-container button { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-    .form-container button { background-color: #28a745; color: white; font-weight: bold; cursor: pointer; }
-    .message { min-height: 1.2em; margin-top: 1rem; font-weight: bold; }
-    .success { color: #28a745; }
-    .error { color: #dc3545; }
-    /* Adicione no final da sua tag <style> */
-.danger-zone {
-    border: 2px solid #dc3545;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-top: 2rem;
-    background-color: #f8d7da;
-}
-.danger-zone h2 {
-    color: #721c24;
-    margin-top: 0;
-}
-.danger-zone button {
-    background-color: #dc3545;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-}
+    .pagination-controls span { margin: 0 0.5rem; }
+    .logs-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .logs-table th, .logs-table td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; }
+    .logs-table th { background-color: #f9f9f9; }
+    .loading-status { text-align: center; color: #555; padding: 2rem; }
+    
+    /* Zona de Perigo */
+    .danger-zone { background-color: #ffebeb; padding: 1rem; border-radius: 8px; border: 1px solid #ffcccc; margin-top: 3rem; }
+    .danger-zone h3 { color: #dc3545; }
+    #delete-all-button { background-color: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    #delete-all-button:hover { background-color: #c82333; }
+    
+    /* Novo Usuário */
+    .new-user-form { margin-top: 2rem; padding: 1rem; background-color: #e9ecef; border-radius: 8px; }
+    .new-user-form label { display: block; margin-bottom: 0.5rem; }
+    .new-user-form input[type="email"],
+    .new-user-form input[type="password"] { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    .new-user-form button { background-color: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .new-user-form button:hover { background-color: #218838; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+    .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 10px; text-align: center; }
+    .modal-content button { margin: 10px; padding: 10px 20px; }
+    .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+    .close-button:hover,
+    .close-button:focus { color: #000; text-decoration: none; cursor: pointer; }
+
   </style>
 </head>
 <body>
+
   <div class="container">
     <div class="header">
-      <a href="/index.html">&larr; Voltar para o Menu Principal</a>
-      <h1>Painel do Administrador</h1>
+      <a href="/index.html">← Voltar para o Menu Principal</a>
     </div>
+
+    <h1>Painel do Administrador</h1>
 
     <h2>Logs de Atividade</h2>
     <div class="controls-container">
-        <input type="text" id="log-search-input" placeholder="Buscar nos logs...">
-        <div class="pagination-controls">
-            <button id="prev-page-button">&larr; Anterior</button>
-            <span id="page-info">Página 1 de 1</span>
-            <button id="next-page-button">Próxima &rarr;</button>
-        </div>
+      <input type="text" id="log-search-input" placeholder="Buscar por Usuário ou Cód. Venda">
+      <div class="pagination-controls">
+        <button id="prev-page" disabled>← Anterior</button>
+        <span id="page-info">Página 1 de 1</span>
+        <button id="next-page" disabled>Próxima →</button>
+      </div>
     </div>
-    <div class="table-container">
-      <table>
-        <thead><tr><th>Horário</th><th>Usuário</th><th>Ação</th><th>Cliente</th><th>Cód. Venda</th></tr></thead>
-        <tbody id="logs-table-body"></tbody>
-      </table>
-    </div>
+    
+    <div id="loading-status" class="loading-status">Carregando logs...</div>
+    
+    <table class="logs-table" id="logs-table" style="display: none;">
+      <thead>
+        <tr>
+          <th>Horário</th>
+          <th>Usuário</th>
+          <th>Ação</th>
+          <th>Cliente</th>
+          <th>Cód. Venda</th>
+        </tr>
+      </thead>
+      <tbody id="log-tbody">
+        </tbody>
+    </table>
+
     <div class="danger-zone">
-    <h2>Zona de Perigo</h2>
-    <p>A ação abaixo é irreversível e irá apagar permanentemente todas as vendas do sistema.</p>
-    <button id="delete-all-button">Excluir Todas as Vendas</button>
-    <div id="delete-message" class="message" style="margin-top: 1rem;"></div>
+      <h3>Zona de Perigo</h3>
+      <p>A ação abaixo é irreversível e irá apagar permanentemente todas as vendas do sistema.</p>
+      <button id="delete-all-button">Excluir Todas as Vendas</button>
+      <div id="delete-status"></div>
     </div>
-    <h2>Criar Novo Usuário</h2>
-    <div class="form-container">
+
+    <div class="new-user-form">
+      <h3>Criar Novo Usuário</h3>
       <form id="create-user-form">
-        <div class="input-group"><input type="email" id="new-email" placeholder="E-mail do novo usuário" required></div>
-        <div class="input-group"><input type="password" id="new-password" placeholder="Senha temporária" required></div>
-        <div class="input-group">
-          <select id="new-role" required>
-            <option value="user">Funcionário (User)</option>
-            <option value="admin">Administrador (Admin)</option>
-          </select>
+        <div style="margin-bottom: 1rem;">
+            <label>
+                <input type="radio" name="user-role" value="user" checked> Funcionário (User)
+            </label>
+            <label style="margin-left: 1rem;">
+                <input type="radio" name="user-role" value="admin"> Administrador (Admin)
+            </label>
         </div>
+        <input type="email" id="new-user-email" placeholder="E-mail" required>
+        <input type="password" id="new-user-password" placeholder="Senha" required>
         <button type="submit">Criar Usuário</button>
+        <div id="create-user-status" style="margin-top: 10px;"></div>
       </form>
-      <div id="form-message" class="message"></div>
+    </div>
+  </div>
+  
+  <div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Confirmação</h2>
+      <p id="modal-message">Você tem certeza que deseja executar esta ação irreversível?</p>
+      <button id="confirm-yes">Sim</button>
+      <button id="confirm-no">Não</button>
     </div>
   </div>
 
-<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    // ⚠️ SUBSTITUA PELAS SUAS CHAVES REAIS AQUI
-    const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co'; // Encontrada em Project Settings > API
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI'; // A chave pública (anon)
+  <script type="module">
+    // --- IMPORTAÇÃO CENTRALIZADA (CORREÇÃO APLICADA) ---
+    import { supabase } from './supabaseClient.js';
+    // --- FIM DA CORREÇÃO ---
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let currentPage = 1;
+    const ITEMS_PER_PAGE = 10;
+    let currentPage = 0;
     let totalPages = 1;
     let currentSearchTerm = '';
+    let currentUserRole = null; // Para armazenar a role do usuário logado
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { window.location.href = '/login.html'; return; }
+    const logTbody = document.getElementById('log-tbody');
+    const loadingStatus = document.getElementById('loading-status');
+    const logsTable = document.getElementById('logs-table');
+    const logSearchInput = document.getElementById('log-search-input');
+    const prevPageButton = document.getElementById('prev-page');
+    const nextPageButton = document.getElementById('next-page');
+    const pageInfoSpan = document.getElementById('page-info');
+    const deleteAllButton = document.getElementById('delete-all-button');
+    const deleteStatusDiv = document.getElementById('delete-status');
+    const createUserForm = document.getElementById('create-user-form');
+    const createUserStatus = document.getElementById('create-user-status');
+    
+    // Elementos do Modal
+    const modal = document.getElementById('confirmation-modal');
+    const closeModal = document.querySelector('.close-button');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo = document.getElementById('confirm-no');
+    const modalMessage = document.getElementById('modal-message');
 
-      const { data: isAdmin } = await supabase.rpc('is_admin');
-      if (!isAdmin) {
-        alert('Acesso negado. Esta área é apenas para administradores.');
-        window.location.href = '/index.html';
-        return;
-      }
 
-      setupEventListeners();
-    const deleteButton = document.getElementById('delete-all-button');
-    const deleteMessageDiv = document.getElementById('delete-message');
+    // --- Funções de Ajuda ---
+    function formatDateTime(isoString) {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' ' + date.toLocaleDateString('pt-BR');
+    }
 
-    deleteButton.addEventListener('click', async () => {
-        const confirm1 = prompt("Esta ação é IRREVERSÍVEL e apagará TODAS as vendas. Para confirmar, digite 'excluir tudo':");
-        if (confirm1 !== 'excluir tudo') {
-            log('Exclusão cancelada.', 'error', deleteMessageDiv);
-            return;
+    function updatePaginationControls() {
+        pageInfoSpan.textContent = `Página ${currentPage + 1} de ${totalPages}`;
+        prevPageButton.disabled = currentPage === 0;
+        nextPageButton.disabled = currentPage >= totalPages - 1;
+    }
+
+    // --- Lógica de Acesso e Logs ---
+
+    async function checkAdminAccess() {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            alert("Acesso negado. Faça login primeiro.");
+            window.location.href = '/login.html';
+            return false;
         }
 
-        const confirm2 = prompt("Confirmação final. Tem ABSOLUTA CERTEZA? Digite 'sim, eu tenho certeza':");
-        if (confirm2 !== 'sim, eu tenho certeza') {
-            log('Exclusão cancelada.', 'error', deleteMessageDiv);
-            return;
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (error || !profile || profile.role !== 'admin') {
+            alert("Acesso negado. Esta página é restrita a administradores.");
+            window.location.href = '/index.html'; // Redireciona para uma página não-admin
+            return false;
         }
 
-        deleteButton.disabled = true;
-        log('Excluindo todos os dados, aguarde...', '', deleteMessageDiv);
+        currentUserRole = profile.role;
+        return true;
+    }
+
+    async function fetchActivityLogs() {
+        if (currentUserRole !== 'admin') return;
+
+        loadingStatus.textContent = "Carregando logs...";
+        logsTable.style.display = 'none';
 
         try {
-            const { data, error } = await supabase.functions.invoke('delete-all-envios');
+            // 1. Contar o total de logs
+            let countQuery = supabase
+                .from('activity_log')
+                .select('*', { count: 'exact', head: true });
+            
+            if (currentSearchTerm) {
+                countQuery = countQuery.or(`usuario.ilike.%${currentSearchTerm}%,cod_venda.ilike.%${currentSearchTerm}%`);
+            }
+            
+            const { count, error: countError } = await countQuery;
+            
+            if (countError) throw countError;
+            
+            totalPages = Math.ceil(count / ITEMS_PER_PAGE);
+            if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
+            
+            updatePaginationControls();
+
+            // 2. Buscar os logs da página atual
+            const from = currentPage * ITEMS_PER_PAGE;
+            const to = from + ITEMS_PER_PAGE - 1;
+
+            let dataQuery = supabase
+                .from('activity_log')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .range(from, to);
+
+            if (currentSearchTerm) {
+                dataQuery = dataQuery.or(`usuario.ilike.%${currentSearchTerm}%,cod_venda.ilike.%${currentSearchTerm}%`);
+            }
+
+            const { data: logs, error } = await dataQuery;
+
             if (error) throw error;
-            log(data.message, 'success', deleteMessageDiv);
-            // Recarrega a página de logs para mostrar que está vazia
-            setTimeout(() => carregarLogs(1, ''), 2000);
-        } catch (err) {
-            log('Erro: ' + (err?.message ?? err), 'error', deleteMessageDiv);
+
+            logTbody.innerHTML = '';
+            if (logs.length === 0) {
+                loadingStatus.textContent = "Nenhum log de atividade encontrado.";
+            } else {
+                logs.forEach(log => {
+                    const row = logTbody.insertRow();
+                    row.insertCell().textContent = formatDateTime(log.created_at);
+                    row.insertCell().textContent = log.usuario || 'N/A';
+                    row.insertCell().textContent = log.acao || 'N/A';
+                    row.insertCell().textContent = log.cliente || 'N/A';
+                    row.insertCell().textContent = log.cod_venda || 'N/A';
+                });
+                loadingStatus.style.display = 'none';
+                logsTable.style.display = 'table';
+            }
+
+        } catch (error) {
+            console.error("Erro ao buscar logs:", error.message);
+            loadingStatus.textContent = `Erro ao carregar logs: ${error.message}`;
+            logsTable.style.display = 'none';
+        }
+    }
+
+    // --- Lógica da Zona de Perigo (Excluir Vendas) ---
+    async function deleteAllVendas() {
+        deleteStatusDiv.textContent = 'Executando exclusão...';
+        deleteAllButton.disabled = true;
+
+        try {
+            // Chamada de RPC (Remote Procedure Call) para excluir os dados
+            const { error } = await supabase.rpc('delete_all_vendas');
+
+            if (error) throw error;
+
+            deleteStatusDiv.textContent = 'Todas as vendas foram excluídas com sucesso. Recarregando logs...';
+            // Recarrega os logs após a exclusão
+            currentPage = 0; 
+            fetchActivityLogs(); 
+        } catch (error) {
+            console.error("Erro ao excluir todas as vendas:", error.message);
+            deleteStatusDiv.textContent = `Erro ao excluir: ${error.message}.`;
         } finally {
-            deleteButton.disabled = false;
+            deleteAllButton.disabled = false;
+        }
+    }
+    
+    // --- Lógica de Criação de Usuário ---
+    createUserForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('new-user-email').value;
+        const password = document.getElementById('new-user-password').value;
+        const role = createUserForm.elements['user-role'].value;
+
+        createUserStatus.textContent = 'Criando usuário...';
+        createUserForm.querySelector('button').disabled = true;
+
+        try {
+            // 1. Criar o usuário no auth
+            const { data: userData, error: authError } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+            });
+
+            if (authError) throw authError;
+
+            // 2. O RLS deve garantir que a função de criação de profile seja disparada ou 
+            // que um trigger no DB crie o profile. Se não, o admin precisa criar manualmente o profile com a role.
+            // Para garantir, vamos fazer uma chamada de RPC para criar/atualizar o perfil.
+            // NOTE: A role do usuário só pode ser alterada por Admin via RLS ou Trigger no DB.
+            const userId = userData.user.id;
+            const { error: profileError } = await supabase.from('profiles').update({ role: role }).eq('id', userId);
+
+            if (profileError) {
+                // Se falhar, talvez seja por RLS. Apenas logamos.
+                console.warn("Aviso: Falha ao definir a role diretamente. Verifique os triggers de DB.", profileError.message);
+            }
+            
+            createUserStatus.textContent = `Usuário "${email}" criado com sucesso como "${role}".`;
+            createUserForm.reset();
+
+        } catch (error) {
+            console.error("Erro ao criar usuário:", error.message);
+            createUserStatus.textContent = `Erro ao criar usuário: ${error.message}`;
+        } finally {
+            createUserForm.querySelector('button').disabled = false;
         }
     });
 
-    // Função auxiliar para logs, para reutilizar
-    function log(msg, type = '', element) {
-        element.textContent = msg;
-        element.className = `message ${type}`;
-    }
-      carregarLogs(currentPage, currentSearchTerm);
-    });
-
-    function setupEventListeners() {
-      const searchInput = document.getElementById('log-search-input');
-      const prevButton = document.getElementById('prev-page-button');
-      const nextButton = document.getElementById('next-page-button');
-      const createUserForm = document.getElementById('create-user-form');
-
-      prevButton.addEventListener('click', () => {
-        if (currentPage > 1) {
+    // --- Event Listeners ---
+    
+    // Paginação
+    prevPageButton.addEventListener('click', () => {
+        if (currentPage > 0) {
             currentPage--;
-            carregarLogs(currentPage, currentSearchTerm);
+            fetchActivityLogs();
         }
-      });
-      nextButton.addEventListener('click', () => {
-        if (currentPage < totalPages) {
+    });
+
+    nextPageButton.addEventListener('click', () => {
+        if (currentPage < totalPages - 1) {
             currentPage++;
-            carregarLogs(currentPage, currentSearchTerm);
+            fetchActivityLogs();
         }
-      });
+    });
 
-      let searchTimeout;
-      searchInput.addEventListener('input', (event) => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            currentSearchTerm = event.target.value;
-            currentPage = 1;
-            carregarLogs(currentPage, currentSearchTerm);
-        }, 300);
-      });
+    // Busca
+    logSearchInput.addEventListener('input', () => {
+        currentSearchTerm = logSearchInput.value.trim();
+        currentPage = 0; // Reinicia a paginação na busca
+        fetchActivityLogs();
+    });
 
-      createUserForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const messageDiv = document.getElementById('form-message');
-        const email = document.getElementById('new-email').value;
-        const password = document.getElementById('new-password').value;
-        const role = document.getElementById('new-role').value;
-        messageDiv.textContent = 'Criando usuário...';
-        messageDiv.className = 'message';
-        const { data, error } = await supabase.functions.invoke('create-user', { body: { email, password, role } });
-        if (error) {
-          messageDiv.textContent = `Erro: ${error.message}`;
-          messageDiv.className = 'message error';
-        } else {
-          messageDiv.textContent = data.message;
-          messageDiv.className = 'message success';
-          createUserForm.reset();
+    // Modal para Exclusão
+    deleteAllButton.addEventListener('click', () => {
+        modalMessage.textContent = "ATENÇÃO: Você tem certeza que deseja EXCLUIR TODAS AS VENDAS permanentemente? Esta ação é irreversível.";
+        modal.style.display = 'block';
+    });
+    
+    closeModal.addEventListener('click', () => { modal.style.display = 'none'; });
+    confirmNo.addEventListener('click', () => { modal.style.display = 'none'; });
+    
+    confirmYes.addEventListener('click', () => {
+        deleteAllVendas();
+        modal.style.display = 'none';
+    });
+
+
+    // Início
+    // 1. Verifica se é admin.
+    // 2. Se for, carrega os logs.
+    checkAdminAccess().then(isAdmin => {
+        if (isAdmin) {
+            fetchActivityLogs();
         }
-      });
-    }
-
-    async function carregarLogs(page = 1, searchTerm = '') {
-      const tableBody = document.getElementById('logs-table-body');
-      const pageInfo = document.getElementById('page-info');
-      const prevButton = document.getElementById('prev-page-button');
-      const nextButton = document.getElementById('next-page-button');
-      tableBody.innerHTML = `<tr><td colspan="5">Carregando...</td></tr>`;
-
-      try {
-        const { data, error } = await supabase.functions.invoke('get-admin-paginated-logs', {
-            body: { page_number: page, search_term: searchTerm }
-        });
-        if (error) throw error;
-
-        const totalCount = data.totalCount || 0;
-        totalPages = Math.ceil(totalCount / 10);
-        if (totalPages === 0) totalPages = 1;
-
-        renderTable(data.logs);
-        pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
-        prevButton.disabled = currentPage <= 1;
-        nextButton.disabled = currentPage >= totalPages;
-      } catch (error) {
-        tableBody.innerHTML = `<tr><td colspan="5">Erro ao carregar logs: ${error.message}</td></tr>`;
-      }
-    }
-
-    function renderTable(logs) {
-      const tableBody = document.getElementById('logs-table-body');
-      tableBody.innerHTML = '';
-      if (!logs || logs.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="5">Nenhum log encontrado.</td></tr>`;
-        return;
-      }
-      logs.forEach(log => {
-        tableBody.innerHTML += `
-          <tr>
-            <td>${new Date(log.created_at).toLocaleString('pt-BR')}</td>
-            <td>${log.user_email || 'N/A'}</td>
-            <td>${log.action}</td>
-            <td>${log.cliente_nome || 'N/A'}</td>
-            <td>${log.codigo_venda || 'N/A'}</td>
-          </tr>
-        `;
-      });
-    }
-    // Correção
-</script>
-</body>
-</html>
-
-<!-- Import Supabase via CDN (UMD global, versão fixada) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.86.0"></script>
-<!-- Após carregar, use: const { createClient } = window.supabase; -->
+    });
+  </script>
 </body>
 </html>
