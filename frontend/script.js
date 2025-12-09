@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+import confetti from 'https://esm.sh/canvas-confetti@1.9.2'
 
 // --- VARIÁVEIS DE COMEMORAÇÃO ---
 let jaComemorouHoje = false; // Trava para não repetir a festa
@@ -60,7 +61,7 @@ function soltarConfetes() {
         }
     }());
 }
-// *** O TRUQUE ***: Isso libera a função para você testar no console!
+// O TRUQUE: Libera a função para teste no console
 window.soltarConfetes = soltarConfetes;
 
 
