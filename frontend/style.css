@@ -1,11 +1,11 @@
-/* --- CONFIGURAÇÕES GERAIS E DENSIDADE --- */
+/* --- VARIÁVEIS E BASE (DENSIDADE ALTA) --- */
 :root {
-    /* Diminuí a fonte base para simular o zoom de 50% */
+    /* Fontes e espaçamentos reduzidos */
     --font-size-base: 12px; 
     --padding-widget: 8px;
     --gap-geral: 10px;
     
-    /* Suas Cores Originais */
+    /* Cores */
     --bg-color: #1E1E1E;
     --card-bg: #2D2D2D;
     --text-color: #E0E0E0;
@@ -21,12 +21,12 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100vw;
-    height: 100vh; /* Trava a altura na tela */
+    height: 100vh; 
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Roboto', sans-serif;
     font-size: var(--font-size-base);
-    overflow: hidden; /* Remove barra de rolagem da janela */
+    overflow: hidden; /* Trava a rolagem da janela */
 }
 
 body {
@@ -35,62 +35,59 @@ body {
     flex-direction: column;
 }
 
-/* --- HEADER --- */
+/* --- HEADER (Topo) --- */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 45px; /* Altura fixa compacta */
+    height: 45px;
     flex-shrink: 0;
     margin-bottom: var(--gap-geral);
 }
 
-.logo-img {
-    height: 100%;
-    max-height: 40px;
-    width: auto;
-}
+.logo-container { height: 100%; display: flex; align-items: center; }
+.logo-img { max-height: 40px; width: auto; }
 
-.header-right {
-    display: flex;
-    gap: 10px;
-}
+.header-right { display: flex; gap: 10px; height: 100%; align-items: center; }
 
 .widget--sm {
     background: var(--card-bg);
-    padding: 4px 12px;
+    padding: 0 12px; /* Padding lateral apenas */
     border-radius: 6px;
     display: flex;
     align-items: center;
+    height: 100%; /* Força altura igual ao logo */
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .top-compact, .clock-numbers { display: flex; align-items: center; gap: 8px; }
-.weather-numbers, .clock-numbers { display: flex; flex-direction: column; text-align: right; }
+.weather-numbers, .clock-numbers { display: flex; flex-direction: column; justify-content: center; text-align: right; }
 
-#weather-icon { width: 30px; height: 30px; }
-#temperature, #time span { font-weight: 700; font-size: 1.2rem; line-height: 1; color: #fff; }
-#description, #date { font-size: 0.75rem; color: var(--secondary-text); text-transform: capitalize; }
+#weather-icon { width: 28px; height: 28px; }
+#temperature, #time span { font-weight: 700; font-size: 1.1rem; line-height: 1; color: #fff; }
+#description, #date { font-size: 0.7rem; color: var(--secondary-text); text-transform: capitalize; margin-top: 2px; }
 
 /* --- GRID PRINCIPAL --- */
 .dashboard-grid {
     display: grid;
-    /* Colunas ajustadas para dar mais espaço ao mapa: 20% | 58% | 22% */
+    /* Colunas: 20% | Auto (Flex) | 22% */
     grid-template-columns: 20% 1fr 22%;
     gap: var(--gap-geral);
     flex-grow: 1;
-    min-height: 0; /* Importante para o Firefox/Grid funcionar com scroll interno */
+    min-height: 0; /* MAGIA: Permite que o grid encolha se precisar */
+    height: 100%;
 }
 
+/* Configuração das Colunas Flexíveis */
 .column-left, .column-center, .column-right {
     display: flex;
     flex-direction: column;
     gap: var(--gap-geral);
-    min-height: 0;
-    height: 100%;
+    height: 100%; 
+    min-height: 0; /* Impede que a coluna trave em tamanho grande */
 }
 
-/* --- ESTILO WIDGETS --- */
+/* --- WIDGETS (A Caixa Mestra) --- */
 .widget {
     background-color: var(--card-bg);
     padding: var(--padding-widget);
@@ -99,137 +96,188 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
+    width: 100%;
+    /* O widget respeita o flex container pai */
+    min-height: 0; 
+    overflow: hidden; /* Nada sai da caixa! */
 }
 
+/* Títulos H2 dentro dos Widgets */
 h2 {
     margin: 0 0 8px 0;
     border-bottom: 1px solid #333;
     padding-bottom: 5px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--highlight-color);
-    flex-shrink: 0;
+    flex-shrink: 0; /* O título nunca encolhe */
 }
 
+/* --- CONTEÚDO ROLÁVEL (Listas) --- */
 .scrollable-content {
-    overflow-y: auto;
-    flex-grow: 1;
+    flex-grow: 1;      /* Ocupa todo o espaço restante */
+    overflow-y: auto;  /* Habilita rolagem interna SE precisar */
+    min-height: 0;     /* Permite encolher */
+    padding-right: 2px; /* Espaço para scrollbar não cobrir texto */
 }
 
-/* Scrollbar fina */
+/* Scrollbar Fina e Discreta */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background-color: #444; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background-color: #666; }
 
-/* --- COLUNA ESQUERDA --- */
+/* --- COLUNA ESQUERDA (Aniversário e Mural) --- */
 .birthday-widget {
-    flex: 0 0 auto; /* Tamanho automático */
-    max-height: 25%;
+    flex-shrink: 0; /* Tamanho fixo baseado no conteúdo ou max-height */
+    max-height: 25%; /* Limite para não roubar espaço do mural */
 }
 .birthday-widget ul li {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 3px 0; border-bottom: 1px solid #333; font-size: 0.9em;
+    padding: 4px 0; border-bottom: 1px solid #333; font-size: 0.9em;
 }
-.birthday-day { background: #444; padding: 1px 5px; border-radius: 3px; font-weight: bold; }
 
 .recognition-widget {
-    flex: 1; /* Ocupa o resto da coluna */
+    flex-grow: 1; /* Ocupa o resto da coluna esquerda */
 }
 .recognition-item {
     background: var(--bg-color); border-radius: 4px; padding: 8px; margin-bottom: 8px;
     border-left: 3px solid var(--highlight-color);
 }
+.recognition-item:last-child { margin-bottom: 0; }
+.recognition-item .header { font-size: 0.8em; margin-bottom: 3px; }
 .recognition-item .header span { color: var(--highlight-color); font-weight: bold; }
-.recognition-item .message { font-style: italic; font-size: 0.85em; margin-top: 4px; color: #ccc; }
+.recognition-item .message { font-style: italic; font-size: 0.85em; color: #ccc; line-height: 1.3; }
 
 /* --- COLUNA CENTRAL --- */
 .janela-stats-widget-horizontal {
-    flex-shrink: 0;
+    flex-shrink: 0; /* Altura automática conforme conteúdo */
 }
-#janela-stats-blocks { display: flex; gap: 8px; justify-content: center; }
+#janela-stats-blocks { 
+    display: flex; 
+    gap: 6px; 
+    justify-content: space-between; /* Distribui melhor */
+    flex-wrap: nowrap; /* Tenta manter na linha */
+    overflow-x: auto; /* Se tela for minúscula, rola lateralmente */
+}
 .janela-block {
-    background: var(--bg-color); border-radius: 4px; padding: 5px 10px;
-    text-align: center; border-bottom: 2px solid var(--highlight-color); min-width: 70px;
+    background: var(--bg-color); border-radius: 4px; padding: 5px;
+    text-align: center; border-bottom: 2px solid var(--highlight-color);
+    flex: 1; /* Todos têm o mesmo tamanho */
+    min-width: 0; /* Permite encolher texto se necessário */
 }
-.janela-block-name { font-size: 0.7em; color: var(--secondary-text); }
-.janela-block-value { font-weight: bold; font-size: 1.1em; }
+.janela-block-name { 
+    font-size: 0.65em; color: var(--secondary-text); 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Corta texto longo */
+}
+.janela-block-value { font-weight: bold; font-size: 1.1em; margin-top: 2px;}
 
-/* MAPA (Ocupa espaço variável) */
+/* MAPA */
 .map-widget {
-    flex-grow: 1; /* O mapa cresce para ocupar o vazio */
+    flex-grow: 1; /* Ocupa todo o espaço vazio central */
     display: flex; flex-direction: column;
 }
 #map-container {
-    flex-grow: 1; width: 100%; height: 100%; position: relative;
+    flex: 1; /* Ocupa altura interna disponível */
+    width: 100%; 
+    position: relative;
     display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
 }
 #brazil-map-svg { width: 100%; height: 100%; }
-.legend { margin-top: 5px; display: flex; justify-content: center; gap: 10px; font-size: 0.75em; }
+.legend { 
+    flex-shrink: 0; 
+    margin-top: 5px; 
+    display: flex; justify-content: center; gap: 10px; font-size: 0.75em; 
+}
 .swatch { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border: 1px solid #555; }
 
-/* TOTAIS (Rodapé Horizontal - Estilo Imagem 2) */
+/* TOTAIS (Rodapé) */
 .totals-widget {
     flex-shrink: 0;
-    flex-direction: row; /* Importante: Horizontal */
-    justify-content: space-around;
+    flex-direction: row; /* Horizontal */
+    justify-content: space-between;
     align-items: center;
     background: #262626;
-    height: 110px; /* Altura fixa */
+    height: 90px; /* Altura compacta fixa */
+    padding: 0 15px; /* Espaço nas laterais */
 }
-.total-item { text-align: center; flex: 1; }
-.total-label { color: var(--secondary-text); font-size: 0.8em; margin-bottom: 5px; }
-.total-value { color: var(--highlight-color); font-size: 1.8em; font-weight: bold; }
-/* Gráfico de Progresso Pequeno */
-#progress-chart-container { width: 80px; height: 80px; margin: 0 auto; position: relative; }
-#progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-#progress-percent { font-size: 1.1em; font-weight: bold; }
-#progress-details { font-size: 0.6em; color: #999; }
+.total-item { 
+    text-align: center; 
+    flex: 1; 
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+.total-label { color: var(--secondary-text); font-size: 0.75em; margin-bottom: 4px; }
+.total-value { color: var(--highlight-color); font-size: 1.6em; font-weight: bold; line-height: 1; }
+
+#progress-chart-container { 
+    width: 65px; height: 65px; /* Tamanho fixo do gráfico */
+    position: relative; 
+}
+#progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%; }
+#progress-percent { font-size: 0.9em; font-weight: bold; color: #fff; }
+#progress-details { display: none; }
 
 /* --- COLUNA DIREITA --- */
 .alert-widget {
     background-color: var(--danger-color);
-    text-align: center; padding: 10px; flex-shrink: 0;
+    text-align: center; padding: 8px; flex-shrink: 0;
+    display: flex; flex-direction: column; justify-content: center;
 }
-.alert-widget h2 { color: #fff; border: none; padding: 0; font-size: 0.9em; }
-.alert-value { color: #fff; font-size: 2.2em; font-weight: bold; margin-top: 5px; line-height: 1; }
+.alert-widget h2 { color: #fff; border: none; padding: 0; margin: 0; font-size: 0.85em; opacity: 0.9; }
+.alert-value { color: #fff; font-size: 2em; font-weight: bold; line-height: 1.1; margin-top: 2px; }
 
+/* Gráficos Laterais (Ocorrências) */
 .occurrences-widget {
-    height: 22%; /* Altura fixa percentual para ficarem iguais */
+    height: 22%; /* Altura fixa percentual */
     flex-shrink: 0;
+    display: flex; flex-direction: column;
 }
-.chart-container { position: relative; width: 100%; flex-grow: 1; }
+.chart-container { 
+    flex-grow: 1; 
+    width: 100%; 
+    min-height: 0; /* Permite ao Chart.js encolher */
+    position: relative; 
+}
+/* Força o canvas a ficar dentro do container */
+.chart-container canvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
 
+/* Próximas Coletas */
 .countdown-widget {
-    flex-grow: 1; /* Ocupa o resto do espaço */
+    flex-grow: 1; /* Ocupa o resto do final da coluna */
+    min-height: 0;
 }
 .countdown-item {
-    background: var(--bg-color); padding: 8px; margin-bottom: 5px; border-radius: 4px;
+    background: var(--bg-color); padding: 6px 10px; margin-bottom: 5px; border-radius: 4px;
     display: flex; justify-content: space-between; align-items: center;
-    border: 1px solid transparent; transition: 0.3s;
+    border: 1px solid transparent; transition: 0.2s;
 }
-.countdown-item:hover { border-color: var(--highlight-color); }
-.countdown-item.imminent { border-color: var(--danger-color); background: #3a1c1c; }
-.countdown-item.finished { opacity: 0.5; text-decoration: line-through; }
-.countdown-item .carrier { color: var(--highlight-color); font-weight: bold; font-size: 0.9em; }
-.countdown-item .timer { font-weight: bold; font-size: 1.1em; }
-.countdown-item .time { font-size: 0.75em; color: #888; }
+.countdown-item .info { display: flex; flex-direction: column; }
+.countdown-item .carrier { color: var(--highlight-color); font-weight: bold; font-size: 0.85em; }
+.countdown-item .time { font-size: 0.7em; color: #888; }
+.countdown-item .timer { font-weight: bold; font-size: 1em; }
 
 /* --- FOOTER (TICKER) --- */
 .news-ticker-container {
-    height: 30px;
+    height: 25px; /* Bem fino */
     background: var(--card-bg);
-    margin-top: var(--gap-geral);
+    margin-top: 8px;
     flex-shrink: 0;
     overflow: hidden; display: flex; align-items: center;
 }
-.news-ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
-.news-ticker p { margin: 0; font-size: 0.9em; }
+.news-ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 45s linear infinite; }
+.news-ticker p { margin: 0; font-size: 0.85em; color: #ccc; }
 @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
-/* Responsividade Mobile (Caso abra no celular, destrava a rolagem) */
+/* --- RESPONSIVIDADE DE SEGURANÇA --- */
 @media (max-width: 1024px) {
     html, body { height: auto; overflow: auto; }
-    .dashboard-grid { grid-template-columns: 1fr; }
-    .totals-widget { flex-direction: column; height: auto; padding: 15px; }
+    .dashboard-grid { grid-template-columns: 1fr; height: auto; }
+    .column-left, .column-center, .column-right { height: auto; }
+    .widget { height: auto; min-height: 200px; }
     .map-widget { height: 350px; }
+    .totals-widget { height: auto; padding: 15px; flex-direction: column; gap: 10px; }
 }
