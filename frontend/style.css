@@ -39,48 +39,49 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 45px;
+    height: 55px; /* Aumentei de 45px para 55px (mais respiro) */
     flex-shrink: 0;
     margin-bottom: var(--gap-geral);
 }
 
 .logo-container { height: 100%; display: flex; align-items: center; }
-.logo-img { max-height: 40px; width: auto; }
+.logo-img { max-height: 45px; width: auto; } /* Logo um tiquinho maior */
 
 .header-right { display: flex; gap: 10px; height: 100%; align-items: center; }
 
 .widget--sm {
     background: var(--card-bg);
-    padding: 0 12px;
+    padding: 0 15px; /* Mais preenchimento lateral */
     border-radius: 6px;
     display: flex;
     align-items: center;
     height: 100%;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    min-width: 160px; /* GARANTE espaço para a data longa não cortar */
 }
 
 .top-compact, .clock-numbers { display: flex; align-items: center; gap: 10px; }
+
 /* Ajuste de alinhamento do texto do relógio */
 .weather-numbers, .clock-numbers { 
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
-    text-align: right; /* Garante alinhamento à direita */
+    text-align: right; 
+    white-space: nowrap; /* Impede quebra de linha feia */
 }
 
-#weather-icon { width: 28px; height: 28px; }
-#temperature, #time span { font-weight: 700; font-size: 1.2rem; line-height: 1; color: #fff; }
+#weather-icon { width: 32px; height: 32px; }
+#temperature, #time span { font-weight: 700; font-size: 1.3rem; line-height: 1; color: #fff; }
 
 /* Ajuste da Data */
 #description, #date { 
-    font-size: 0.75rem; 
+    font-size: 0.8rem; /* Fonte ligeiramente maior para ler melhor */
     color: var(--secondary-text); 
     text-transform: capitalize; 
-    margin-top: 3px; 
-    white-space: nowrap; /* Impede que a data quebre linha */
+    margin-top: 4px; 
     line-height: 1;
 }
-
 /* --- GRID PRINCIPAL --- */
 .dashboard-grid {
     display: grid;
@@ -138,52 +139,65 @@ h2 {
 /* --- COLUNA ESQUERDA --- */
 .birthday-widget {
     flex-shrink: 0;
-    max-height: 25%;
-}
-.birthday-widget ul li {
+    max-height: 30%; /* Aumentei de 25% para 30% (usa o espaço de sobra) */
     display: flex; 
-    align-items: center; /* Alinha ícone e texto verticalmente */
-    padding: 5px 0; 
-    border-bottom: 1px solid #333; 
-    font-size: 0.9em;
+    flex-direction: column;
 }
+
+/* Remove o padding padrão da lista para jogar o bolo p/ esquerda */
+.birthday-widget ul {
+    padding-left: 5px; /* Apenas um pequeno respiro da borda */
+    margin: 0;
+}
+
+.birthday-widget ul li {
+    display: grid;
+    /* Define colunas: Ícone | Dia | Nome */
+    grid-template-columns: 20px auto 1fr; 
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0; /* Mais espaço vertical entre nomes */
+    border-bottom: 1px solid #333; 
+    font-size: 0.95em;
+}
+
 /* Ícone de Bolo via CSS */
 .birthday-widget ul li::before {
     content: '🎂';
-    margin-right: 8px;
-    font-size: 1.1em;
+    font-size: 1.2em;
+    display: flex;
+    justify-content: center;
 }
+
+/* O Dia (ex: 20) */
 .birthday-day { 
     background: #444; 
-    padding: 1px 6px; 
-    border-radius: 3px; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
     font-weight: bold; 
-    margin-right: auto; /* Empurra o nome para a direita se quiser, ou remova para alinhar junto */
-    display: none; /* Ocultar o dia numérico se quiser só o nome, ou ajustar layout */
-}
-/* Ajuste para o nome e dia ficarem bonitos */
-.birthday-widget ul li span:last-child {
-    flex: 1;
-    text-align: right; /* Data na esquerda, Nome na direita */
-    font-weight: 500;
-}
-/* Caso o seu HTML tenha <span class="birthday-day">Dia</span><span>Nome</span> */
-.birthday-widget .birthday-day { 
-    display: inline-block; 
-    margin-right: 8px; 
     color: #fff;
+    text-align: center;
+    font-size: 0.85em;
 }
 
+/* O Nome */
+.birthday-widget ul li span:last-child {
+    text-align: left; /* Alinha nome à esquerda, perto da data */
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Corta com ... se o nome for gigante */
+}
 
+/* Mural de Reconhecimento (ajusta para ocupar o resto) */
 .recognition-widget { flex-grow: 1; }
 .recognition-item {
-    background: var(--bg-color); border-radius: 4px; padding: 8px; margin-bottom: 8px;
+    background: var(--bg-color); border-radius: 4px; padding: 10px; margin-bottom: 8px;
     border-left: 3px solid var(--highlight-color);
 }
-.recognition-item .header { font-size: 0.8em; margin-bottom: 3px; }
+.recognition-item .header { font-size: 0.85em; margin-bottom: 4px; }
 .recognition-item .header span { color: var(--highlight-color); font-weight: bold; }
-.recognition-item .message { font-style: italic; font-size: 0.85em; color: #ccc; line-height: 1.3; }
-
+.recognition-item .message { font-style: italic; font-size: 0.9em; color: #ccc; line-height: 1.4; }
 /* --- COLUNA CENTRAL --- */
 .janela-stats-widget-horizontal { flex-shrink: 0; }
 #janela-stats-blocks { 
