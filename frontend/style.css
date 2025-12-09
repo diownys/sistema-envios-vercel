@@ -1,300 +1,235 @@
-/* --- VARIÁVEIS E CORES --- */
-:root { 
-  /* Escalas fluídas usando clamp() */
-  --font-size-base: clamp(12px, 0.9vw, 16px); 
-  --padding-widget: clamp(10px, 1.2vmin, 15px); 
-  --gap-geral: clamp(10px, 1.4vmin, 20px); 
-
-  /* Paleta de Cores */ 
-  --bg-color: #1E1E1E; 
-  --card-bg: #2D2D2D; 
-  --text-color: #E0E0E0; 
-  --highlight-color: #f0c44c; 
-  --secondary-text: #A0A0A0; 
-  --danger-color: #d63031; 
-  --info-color: #273c75; 
+/* --- CONFIGURAÇÕES GERAIS E DENSIDADE --- */
+:root {
+    /* Diminuí a fonte base para simular o zoom de 50% */
+    --font-size-base: 12px; 
+    --padding-widget: 8px;
+    --gap-geral: 10px;
+    
+    /* Suas Cores Originais */
+    --bg-color: #1E1E1E;
+    --card-bg: #2D2D2D;
+    --text-color: #E0E0E0;
+    --highlight-color: #f0c44c;
+    --secondary-text: #A0A0A0;
+    --danger-color: #d63031;
+    --info-color: #273c75;
 }
 
-/* --- RESET & BODY --- */
 * { box-sizing: border-box; }
 
-html, body { 
-  margin: 0; 
-  padding: 0; 
-  width: 100%;
-  background-color: var(--bg-color); 
-  color: var(--text-color); 
-  font-family: 'Roboto', 'Inter', sans-serif; 
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh; /* Trava a altura na tela */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Roboto', sans-serif;
+    font-size: var(--font-size-base);
+    overflow: hidden; /* Remove barra de rolagem da janela */
 }
 
-body { 
-  font-size: var(--font-size-base); 
-  padding: var(--gap-geral); 
-  display: flex; 
-  flex-direction: column; 
-  /* Por padrão (mobile/telas pequenas), permitimos scroll */
-  height: auto; 
-  min-height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-} 
+body {
+    padding: var(--gap-geral);
+    display: flex;
+    flex-direction: column;
+}
 
-/* --- CABEÇALHO --- */
+/* --- HEADER --- */
 .dashboard-header {
-  display: flex;
-  flex-wrap: wrap; /* Permite quebrar linha em telas muito pequenas */
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--gap-geral);
-  margin-bottom: var(--gap-geral);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 45px; /* Altura fixa compacta */
+    flex-shrink: 0;
+    margin-bottom: var(--gap-geral);
 }
 
-.header-left { flex-shrink: 0; }
 .logo-img {
-  max-height: clamp(35px, 6vh, 60px);
-  width: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,.25));
+    height: 100%;
+    max-height: 40px;
+    width: auto;
 }
 
 .header-right {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+    display: flex;
+    gap: 10px;
 }
 
-/* Widgets compactos do topo */
 .widget--sm {
-  padding: 8px 12px;
-  background-color: var(--card-bg);
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
+    background: var(--card-bg);
+    padding: 4px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-.top-compact, .clock-numbers { display: flex; align-items: center; gap: 10px; }
+
+.top-compact, .clock-numbers { display: flex; align-items: center; gap: 8px; }
 .weather-numbers, .clock-numbers { display: flex; flex-direction: column; text-align: right; }
 
-#weather-icon { width: 40px; height: 40px; }
-#temperature, #time span { font-weight: 700; font-size: 1.2rem; line-height: 1; color: var(--text-color); }
+#weather-icon { width: 30px; height: 30px; }
+#temperature, #time span { font-weight: 700; font-size: 1.2rem; line-height: 1; color: #fff; }
 #description, #date { font-size: 0.75rem; color: var(--secondary-text); text-transform: capitalize; }
 
-/* --- GRID PRINCIPAL (Layout Responsivo) --- */
+/* --- GRID PRINCIPAL --- */
 .dashboard-grid {
-  display: grid;
-  gap: var(--gap-geral);
-  flex-grow: 1;
-  width: 100%;
+    display: grid;
+    /* Colunas ajustadas para dar mais espaço ao mapa: 20% | 58% | 22% */
+    grid-template-columns: 20% 1fr 22%;
+    gap: var(--gap-geral);
+    flex-grow: 1;
+    min-height: 0; /* Importante para o Firefox/Grid funcionar com scroll interno */
 }
 
-/* --- COLUNAS --- */
 .column-left, .column-center, .column-right {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-geral);
-  min-width: 0; /* Evita estouro de conteúdo flex */
-}
-
-/* --- WIDGETS GERAIS --- */
-.widget { 
-  background-color: var(--card-bg); 
-  padding: var(--padding-widget); 
-  border-radius: 10px; 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-  display: flex; 
-  flex-direction: column; 
-  position: relative;
-} 
-
-h2 { 
-  margin: 0 0 10px 0; 
-  border-bottom: 1px solid #333; 
-  padding-bottom: 10px; 
-  font-size: 1.1rem; 
-  font-weight: 600; 
-  color: var(--highlight-color); 
-  flex-shrink: 0;
-} 
-
-/* Listas e Scrolls */
-ul { list-style: none; padding: 0; margin: 0; } 
-li { padding-bottom: 8px; font-size: 0.95em; } 
-
-.scrollable-content { 
-  overflow-y: auto; 
-  flex-grow: 1; 
-  /* Altura mínima para mobile, será sobrescrita no desktop */
-  min-height: 150px; 
-  max-height: 300px;
-} 
-
-/* Scrollbar Bonita */
-::-webkit-scrollbar { width: 6px; } 
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); } 
-::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; } 
-::-webkit-scrollbar-thumb:hover { background: #777; } 
-
-/* --- CONTEÚDO ESPECÍFICO --- */
-
-/* Aniversários */
-.birthday-widget li { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #3a3a3a; padding: 5px 0;}
-.birthday-widget li::before { content: '🎂'; margin-right: 10px; } 
-.birthday-day { font-weight: 700; background-color: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;}
-
-/* Reconhecimentos */
-.recognition-item { 
-  background-color: var(--bg-color); 
-  border-radius: 6px; 
-  padding: 10px; 
-  margin-bottom: 10px; 
-  border-left: 3px solid var(--highlight-color); 
-}
-.recognition-item .header { font-size: 0.85em; color: var(--secondary-text); margin-bottom: 5px; }
-.recognition-item .header span { color: var(--highlight-color); font-weight: bold; }
-.recognition-item .message { font-style: italic; color: #fff; font-size: 0.95em; }
-
-/* Janelas */
-#janela-stats-blocks { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; } 
-.janela-block { 
-  background-color: var(--bg-color); 
-  border-radius: 6px; 
-  padding: 8px 12px; 
-  text-align: center; 
-  border-bottom: 3px solid var(--highlight-color); 
-  flex: 1 1 80px; /* Cresce e encolhe, base 80px */
-} 
-.janela-block-name { font-size: 0.75em; color: var(--secondary-text); } 
-.janela-block-value { font-weight: 700; font-size: 1.2em; } 
-
-/* Mapa */
-.map-widget { 
-  min-height: 300px; /* Altura garantida no mobile */
-  display: flex; flex-direction: column;
-} 
-#map-container { flex-grow: 1; position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;} 
-#brazil-map-svg { width: 100%; height: 100%; max-height: 100%; } 
-.state-label { font-size: 10px; fill: #fff; pointer-events: none; text-shadow: 1px 1px 2px black; text-anchor: middle;}
-.legend { display: flex; justify-content: center; gap: 10px; margin-top: 10px; font-size: 0.8em; flex-wrap: wrap;} 
-.swatch { display: inline-block; width: 12px; height: 12px; margin-right: 4px; border: 1px solid #555; }
-
-/* Totais */
-.totals-widget { 
-  display: flex; 
-  flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
-  justify-content: space-around; 
-  align-items: center; 
-  gap: 15px; 
-  text-align: center; 
-  background-color: #2a2a2a; 
-} 
-.total-item { flex: 1; min-width: 120px; }
-.total-label { font-size: 0.85em; color: var(--secondary-text); margin-bottom: 5px; } 
-.total-value { font-size: 1.8em; font-weight: 700; color: var(--highlight-color); } 
-
-/* Gráfico de Progresso */
-#progress-chart-container { 
-  position: relative; 
-  height: 100px; width: 100px; 
-  margin: 0 auto; 
-} 
-#progress-text { 
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-  text-align: center; width: 100%;
-} 
-#progress-percent { font-size: 1.2em; font-weight: bold; } 
-#progress-details { font-size: 0.6em; color: var(--secondary-text); } 
-
-/* Alerta e Gráficos Pequenos */
-.alert-widget { background-color: var(--info-color); text-align: center; transition: background-color 0.5s; }
-.alert-widget h2 { color: #fff; border: none; padding: 0; margin-bottom: 5px; }
-.alert-value { font-size: 2.5em; font-weight: 700; color: #fff; }
-
-/* Ocorrências Gráficos */
-.chart-container { height: 160px; position: relative; width: 100%; }
-
-/* Coletas / Countdown */
-.countdown-item { 
-  background-color: var(--bg-color); border-radius: 6px; padding: 10px; 
-  margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; 
-  border: 1px solid transparent; transition: all 0.3s;
-} 
-.countdown-item:hover { border-color: var(--highlight-color); }
-.countdown-item.imminent { background-color: #4a2c00; border-color: var(--danger-color); animation: pulse 2s infinite; }
-.countdown-item.finished { opacity: 0.5; text-decoration: line-through; }
-.countdown-item .info { display: flex; flex-direction: column; }
-.countdown-item .carrier { font-weight: bold; color: var(--highlight-color); }
-.countdown-item .time { font-size: 0.8em; color: var(--secondary-text); }
-.countdown-item .timer { font-weight: 700; font-size: 1.2em; }
-
-/* Rodapé Ticker */
-.news-ticker-container { 
-  background-color: var(--card-bg); 
-  padding: 8px 0; 
-  margin-top: var(--gap-geral);
-  width: 100%; overflow: hidden; white-space: nowrap; 
-} 
-.news-ticker { display: inline-block; padding-left: 100%; animation: ticker 40s linear infinite; } 
-@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(214, 48, 49, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(214, 48, 49, 0); } 100% { box-shadow: 0 0 0 0 rgba(214, 48, 49, 0); } }
-
-/* ==========================================================================
-   MEDIA QUERIES (AQUI ACONTECE A RESPONSIVIDADE)
-   ========================================================================== */
-
-/* 1. MODO MOBILE / TABLET (Padrão até 1024px) */
-/* Já definido acima no CSS base (grid de 1 coluna, height auto) */
-@media (max-width: 1024px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr; /* 1 Coluna */
-  }
-  
-  /* Ordem visual no mobile: Totais primeiro, depois mapa, depois o resto */
-  .column-center { order: -1; }
-  
-  /* Ajuste no mapa para não ficar gigante no mobile */
-  .map-widget { height: 40vh; max-height: 400px; }
-}
-
-/* 2. MODO DESKTOP / TV / KIOSK (> 1025px) */
-/* Aqui travamos a tela para não rolar e usamos as 3 colunas */
-@media (min-width: 1025px) {
-  html, body {
-    height: 100vh;
-    overflow: hidden; /* Remove rolagem da página inteira */
-  }
-
-  .dashboard-grid {
-    /* 22% esquerda, Resto centro, 22% direita */
-    grid-template-columns: 22% 1fr 22%; 
-  }
-
-  .column-left, .column-center, .column-right {
-    height: 100%; /* Ocupa altura total disponível */
-    overflow: hidden; /* Rolagem apenas dentro dos widgets se necessário */
-  }
-
-  /* Widgets que precisam esticar para ocupar o espaço vertical */
-  .birthday-widget, .recognition-widget, 
-  .map-widget, .occurrences-widget, .countdown-widget {
-    flex-grow: 1; /* Estica para preencher espaço vazio */
-    min-height: 0; /* Importante para flexbox scrolling */
-  }
-  
-  /* Ajuste específico para o Mapa no desktop */
-  .map-widget { 
-    flex-grow: 2; /* Mapa cresce mais que os outros */
-  }
-
-  /* Remove limites de altura fixa que usamos no mobile */
-  .scrollable-content {
-    max-height: none; 
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-geral);
+    min-height: 0;
     height: 100%;
-  }
+}
 
-  /* Totais no desktop ficam lado a lado certinho */
-  .totals-widget {
-    flex-grow: 0; /* Não estica verticalmente */
+/* --- ESTILO WIDGETS --- */
+.widget {
+    background-color: var(--card-bg);
+    padding: var(--padding-widget);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+h2 {
+    margin: 0 0 8px 0;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--highlight-color);
     flex-shrink: 0;
-    padding: 10px;
-  }
+}
+
+.scrollable-content {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Scrollbar fina */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+
+/* --- COLUNA ESQUERDA --- */
+.birthday-widget {
+    flex: 0 0 auto; /* Tamanho automático */
+    max-height: 25%;
+}
+.birthday-widget ul li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 3px 0; border-bottom: 1px solid #333; font-size: 0.9em;
+}
+.birthday-day { background: #444; padding: 1px 5px; border-radius: 3px; font-weight: bold; }
+
+.recognition-widget {
+    flex: 1; /* Ocupa o resto da coluna */
+}
+.recognition-item {
+    background: var(--bg-color); border-radius: 4px; padding: 8px; margin-bottom: 8px;
+    border-left: 3px solid var(--highlight-color);
+}
+.recognition-item .header span { color: var(--highlight-color); font-weight: bold; }
+.recognition-item .message { font-style: italic; font-size: 0.85em; margin-top: 4px; color: #ccc; }
+
+/* --- COLUNA CENTRAL --- */
+.janela-stats-widget-horizontal {
+    flex-shrink: 0;
+}
+#janela-stats-blocks { display: flex; gap: 8px; justify-content: center; }
+.janela-block {
+    background: var(--bg-color); border-radius: 4px; padding: 5px 10px;
+    text-align: center; border-bottom: 2px solid var(--highlight-color); min-width: 70px;
+}
+.janela-block-name { font-size: 0.7em; color: var(--secondary-text); }
+.janela-block-value { font-weight: bold; font-size: 1.1em; }
+
+/* MAPA (Ocupa espaço variável) */
+.map-widget {
+    flex-grow: 1; /* O mapa cresce para ocupar o vazio */
+    display: flex; flex-direction: column;
+}
+#map-container {
+    flex-grow: 1; width: 100%; height: 100%; position: relative;
+    display: flex; align-items: center; justify-content: center;
+}
+#brazil-map-svg { width: 100%; height: 100%; }
+.legend { margin-top: 5px; display: flex; justify-content: center; gap: 10px; font-size: 0.75em; }
+.swatch { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border: 1px solid #555; }
+
+/* TOTAIS (Rodapé Horizontal - Estilo Imagem 2) */
+.totals-widget {
+    flex-shrink: 0;
+    flex-direction: row; /* Importante: Horizontal */
+    justify-content: space-around;
+    align-items: center;
+    background: #262626;
+    height: 110px; /* Altura fixa */
+}
+.total-item { text-align: center; flex: 1; }
+.total-label { color: var(--secondary-text); font-size: 0.8em; margin-bottom: 5px; }
+.total-value { color: var(--highlight-color); font-size: 1.8em; font-weight: bold; }
+/* Gráfico de Progresso Pequeno */
+#progress-chart-container { width: 80px; height: 80px; margin: 0 auto; position: relative; }
+#progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+#progress-percent { font-size: 1.1em; font-weight: bold; }
+#progress-details { font-size: 0.6em; color: #999; }
+
+/* --- COLUNA DIREITA --- */
+.alert-widget {
+    background-color: var(--danger-color);
+    text-align: center; padding: 10px; flex-shrink: 0;
+}
+.alert-widget h2 { color: #fff; border: none; padding: 0; font-size: 0.9em; }
+.alert-value { color: #fff; font-size: 2.2em; font-weight: bold; margin-top: 5px; line-height: 1; }
+
+.occurrences-widget {
+    height: 22%; /* Altura fixa percentual para ficarem iguais */
+    flex-shrink: 0;
+}
+.chart-container { position: relative; width: 100%; flex-grow: 1; }
+
+.countdown-widget {
+    flex-grow: 1; /* Ocupa o resto do espaço */
+}
+.countdown-item {
+    background: var(--bg-color); padding: 8px; margin-bottom: 5px; border-radius: 4px;
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid transparent; transition: 0.3s;
+}
+.countdown-item:hover { border-color: var(--highlight-color); }
+.countdown-item.imminent { border-color: var(--danger-color); background: #3a1c1c; }
+.countdown-item.finished { opacity: 0.5; text-decoration: line-through; }
+.countdown-item .carrier { color: var(--highlight-color); font-weight: bold; font-size: 0.9em; }
+.countdown-item .timer { font-weight: bold; font-size: 1.1em; }
+.countdown-item .time { font-size: 0.75em; color: #888; }
+
+/* --- FOOTER (TICKER) --- */
+.news-ticker-container {
+    height: 30px;
+    background: var(--card-bg);
+    margin-top: var(--gap-geral);
+    flex-shrink: 0;
+    overflow: hidden; display: flex; align-items: center;
+}
+.news-ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
+.news-ticker p { margin: 0; font-size: 0.9em; }
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+/* Responsividade Mobile (Caso abra no celular, destrava a rolagem) */
+@media (max-width: 1024px) {
+    html, body { height: auto; overflow: auto; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .totals-widget { flex-direction: column; height: auto; padding: 15px; }
+    .map-widget { height: 350px; }
 }
