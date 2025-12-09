@@ -12,13 +12,13 @@
 </head>
 <body>
   
-  <header class="dashboard-header" role="banner">
+  <header class="dashboard-header">
     <div class="header-left logo-container">
       <img src="./drogavet_neuvye.png" alt="Logo" class="logo-img">
     </div>
 
     <div class="header-right">
-      <section class="widget widget--sm weather-widget">
+      <div class="widget widget--sm weather-widget">
         <div class="weather-body top-compact">
           <img id="weather-icon" alt="Clima" />
           <div class="weather-numbers">
@@ -26,18 +26,18 @@
             <small id="description">...</small>
           </div>
         </div>
-      </section>
+      </div>
       
-      <section class="widget widget--sm clock-widget">
+      <div class="widget widget--sm clock-widget">
         <div class="clock-numbers">
           <div id="time"><span id="clock">--:--:--</span></div>
           <small id="date">&nbsp;</small>
         </div>
-      </section>
+      </div>
     </div>
   </header>
 
-  <main class="dashboard-grid" role="main">
+  <main class="dashboard-grid">
     
     <section class="column-left">
       <div class="widget birthday-widget">
@@ -60,7 +60,7 @@
         <div id="janela-stats-blocks"></div>
       </div>
 
-      <div class="widget map-widget map-widget--large">
+      <div class="widget map-widget">
         <h2>🗺️ Envios Concluídos por UF</h2>
         <div id="map-container">
           <svg id="brazil-map-svg"></svg>
@@ -88,7 +88,7 @@
             <canvas id="progress-chart"></canvas>
             <div id="progress-text">
               <div id="progress-percent">0%</div>
-              <div id="progress-details">0 de 0</div>
+              <div id="progress-details">0/0</div>
             </div>
           </div>
         </div>
