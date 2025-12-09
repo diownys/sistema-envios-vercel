@@ -1,6 +1,5 @@
 /* --- VARIÁVEIS E BASE (DENSIDADE ALTA) --- */
 :root {
-    /* Fontes e espaçamentos reduzidos */
     --font-size-base: 12px; 
     --padding-widget: 8px;
     --gap-geral: 10px;
@@ -52,42 +51,55 @@ body {
 
 .widget--sm {
     background: var(--card-bg);
-    padding: 0 12px; /* Padding lateral apenas */
+    padding: 0 12px;
     border-radius: 6px;
     display: flex;
     align-items: center;
-    height: 100%; /* Força altura igual ao logo */
+    height: 100%;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.top-compact, .clock-numbers { display: flex; align-items: center; gap: 8px; }
-.weather-numbers, .clock-numbers { display: flex; flex-direction: column; justify-content: center; text-align: right; }
+.top-compact, .clock-numbers { display: flex; align-items: center; gap: 10px; }
+/* Ajuste de alinhamento do texto do relógio */
+.weather-numbers, .clock-numbers { 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    text-align: right; /* Garante alinhamento à direita */
+}
 
 #weather-icon { width: 28px; height: 28px; }
-#temperature, #time span { font-weight: 700; font-size: 1.1rem; line-height: 1; color: #fff; }
-#description, #date { font-size: 0.7rem; color: var(--secondary-text); text-transform: capitalize; margin-top: 2px; }
+#temperature, #time span { font-weight: 700; font-size: 1.2rem; line-height: 1; color: #fff; }
+
+/* Ajuste da Data */
+#description, #date { 
+    font-size: 0.75rem; 
+    color: var(--secondary-text); 
+    text-transform: capitalize; 
+    margin-top: 3px; 
+    white-space: nowrap; /* Impede que a data quebre linha */
+    line-height: 1;
+}
 
 /* --- GRID PRINCIPAL --- */
 .dashboard-grid {
     display: grid;
-    /* Colunas: 20% | Auto (Flex) | 22% */
     grid-template-columns: 20% 1fr 22%;
     gap: var(--gap-geral);
     flex-grow: 1;
-    min-height: 0; /* MAGIA: Permite que o grid encolha se precisar */
+    min-height: 0; 
     height: 100%;
 }
 
-/* Configuração das Colunas Flexíveis */
 .column-left, .column-center, .column-right {
     display: flex;
     flex-direction: column;
     gap: var(--gap-geral);
     height: 100%; 
-    min-height: 0; /* Impede que a coluna trave em tamanho grande */
+    min-height: 0;
 }
 
-/* --- WIDGETS (A Caixa Mestra) --- */
+/* --- WIDGETS --- */
 .widget {
     background-color: var(--card-bg);
     padding: var(--padding-widget);
@@ -97,12 +109,10 @@ body {
     flex-direction: column;
     position: relative;
     width: 100%;
-    /* O widget respeita o flex container pai */
     min-height: 0; 
-    overflow: hidden; /* Nada sai da caixa! */
+    overflow: hidden;
 }
 
-/* Títulos H2 dentro dos Widgets */
 h2 {
     margin: 0 0 8px 0;
     border-bottom: 1px solid #333;
@@ -110,110 +120,109 @@ h2 {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--highlight-color);
-    flex-shrink: 0; /* O título nunca encolhe */
+    flex-shrink: 0;
 }
 
-/* --- CONTEÚDO ROLÁVEL (Listas) --- */
 .scrollable-content {
-    flex-grow: 1;      /* Ocupa todo o espaço restante */
-    overflow-y: auto;  /* Habilita rolagem interna SE precisar */
-    min-height: 0;     /* Permite encolher */
-    padding-right: 2px; /* Espaço para scrollbar não cobrir texto */
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 2px;
 }
 
-/* Scrollbar Fina e Discreta */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background-color: #444; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background-color: #666; }
 
-/* --- COLUNA ESQUERDA (Aniversário e Mural) --- */
+/* --- COLUNA ESQUERDA --- */
 .birthday-widget {
-    flex-shrink: 0; /* Tamanho fixo baseado no conteúdo ou max-height */
-    max-height: 25%; /* Limite para não roubar espaço do mural */
+    flex-shrink: 0;
+    max-height: 25%;
 }
 .birthday-widget ul li {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 4px 0; border-bottom: 1px solid #333; font-size: 0.9em;
+    display: flex; 
+    align-items: center; /* Alinha ícone e texto verticalmente */
+    padding: 5px 0; 
+    border-bottom: 1px solid #333; 
+    font-size: 0.9em;
+}
+/* Ícone de Bolo via CSS */
+.birthday-widget ul li::before {
+    content: '🎂';
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+.birthday-day { 
+    background: #444; 
+    padding: 1px 6px; 
+    border-radius: 3px; 
+    font-weight: bold; 
+    margin-right: auto; /* Empurra o nome para a direita se quiser, ou remova para alinhar junto */
+    display: none; /* Ocultar o dia numérico se quiser só o nome, ou ajustar layout */
+}
+/* Ajuste para o nome e dia ficarem bonitos */
+.birthday-widget ul li span:last-child {
+    flex: 1;
+    text-align: right; /* Data na esquerda, Nome na direita */
+    font-weight: 500;
+}
+/* Caso o seu HTML tenha <span class="birthday-day">Dia</span><span>Nome</span> */
+.birthday-widget .birthday-day { 
+    display: inline-block; 
+    margin-right: 8px; 
+    color: #fff;
 }
 
-.recognition-widget {
-    flex-grow: 1; /* Ocupa o resto da coluna esquerda */
-}
+
+.recognition-widget { flex-grow: 1; }
 .recognition-item {
     background: var(--bg-color); border-radius: 4px; padding: 8px; margin-bottom: 8px;
     border-left: 3px solid var(--highlight-color);
 }
-.recognition-item:last-child { margin-bottom: 0; }
 .recognition-item .header { font-size: 0.8em; margin-bottom: 3px; }
 .recognition-item .header span { color: var(--highlight-color); font-weight: bold; }
 .recognition-item .message { font-style: italic; font-size: 0.85em; color: #ccc; line-height: 1.3; }
 
 /* --- COLUNA CENTRAL --- */
-.janela-stats-widget-horizontal {
-    flex-shrink: 0; /* Altura automática conforme conteúdo */
-}
+.janela-stats-widget-horizontal { flex-shrink: 0; }
 #janela-stats-blocks { 
-    display: flex; 
-    gap: 6px; 
-    justify-content: space-between; /* Distribui melhor */
-    flex-wrap: nowrap; /* Tenta manter na linha */
-    overflow-x: auto; /* Se tela for minúscula, rola lateralmente */
+    display: flex; gap: 6px; justify-content: space-between; overflow-x: auto; 
 }
 .janela-block {
     background: var(--bg-color); border-radius: 4px; padding: 5px;
     text-align: center; border-bottom: 2px solid var(--highlight-color);
-    flex: 1; /* Todos têm o mesmo tamanho */
-    min-width: 0; /* Permite encolher texto se necessário */
+    flex: 1; min-width: 0;
 }
 .janela-block-name { 
     font-size: 0.65em; color: var(--secondary-text); 
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Corta texto longo */
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
 }
 .janela-block-value { font-weight: bold; font-size: 1.1em; margin-top: 2px;}
 
-/* MAPA */
 .map-widget {
-    flex-grow: 1; /* Ocupa todo o espaço vazio central */
-    display: flex; flex-direction: column;
+    flex-grow: 1; display: flex; flex-direction: column;
 }
 #map-container {
-    flex: 1; /* Ocupa altura interna disponível */
-    width: 100%; 
-    position: relative;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
+    flex: 1; width: 100%; position: relative;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 #brazil-map-svg { width: 100%; height: 100%; }
-.legend { 
-    flex-shrink: 0; 
-    margin-top: 5px; 
-    display: flex; justify-content: center; gap: 10px; font-size: 0.75em; 
-}
+.legend { flex-shrink: 0; margin-top: 5px; display: flex; justify-content: center; gap: 10px; font-size: 0.75em; }
 .swatch { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border: 1px solid #555; }
 
-/* TOTAIS (Rodapé) */
 .totals-widget {
-    flex-shrink: 0;
-    flex-direction: row; /* Horizontal */
-    justify-content: space-between;
-    align-items: center;
-    background: #262626;
-    height: 90px; /* Altura compacta fixa */
-    padding: 0 15px; /* Espaço nas laterais */
+    flex-shrink: 0; flex-direction: row; justify-content: space-between; align-items: center;
+    background: #262626; height: 90px; padding: 0 15px;
 }
 .total-item { 
-    text-align: center; 
-    flex: 1; 
+    text-align: center; flex: 1; 
     display: flex; flex-direction: column; justify-content: center; align-items: center;
 }
 .total-label { color: var(--secondary-text); font-size: 0.75em; margin-bottom: 4px; }
 .total-value { color: var(--highlight-color); font-size: 1.6em; font-weight: bold; line-height: 1; }
 
-#progress-chart-container { 
-    width: 65px; height: 65px; /* Tamanho fixo do gráfico */
-    position: relative; 
-}
+#progress-chart-container { width: 65px; height: 65px; position: relative; }
 #progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%; }
 #progress-percent { font-size: 0.9em; font-weight: bold; color: #fff; }
 #progress-details { display: none; }
@@ -227,57 +236,69 @@ h2 {
 .alert-widget h2 { color: #fff; border: none; padding: 0; margin: 0; font-size: 0.85em; opacity: 0.9; }
 .alert-value { color: #fff; font-size: 2em; font-weight: bold; line-height: 1.1; margin-top: 2px; }
 
-/* Gráficos Laterais (Ocorrências) */
-.occurrences-widget {
-    height: 22%; /* Altura fixa percentual */
-    flex-shrink: 0;
-    display: flex; flex-direction: column;
-}
-.chart-container { 
-    flex-grow: 1; 
-    width: 100%; 
-    min-height: 0; /* Permite ao Chart.js encolher */
-    position: relative; 
-}
-/* Força o canvas a ficar dentro do container */
-.chart-container canvas {
-    max-width: 100% !important;
-    max-height: 100% !important;
+.occurrences-widget { height: 22%; flex-shrink: 0; display: flex; flex-direction: column; }
+.chart-container { flex-grow: 1; width: 100%; min-height: 0; position: relative; }
+.chart-container canvas { max-width: 100% !important; max-height: 100% !important; }
+
+/* --- COLETAS / COUNTDOWN (Estilos Restaurados) --- */
+.countdown-widget { flex-grow: 1; min-height: 0; }
+
+.countdown-item {
+    background: var(--bg-color); padding: 8px 10px; margin-bottom: 5px; border-radius: 4px;
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid transparent; transition: 0.3s;
 }
 
-/* Próximas Coletas */
-.countdown-widget {
-    flex-grow: 1; /* Ocupa o resto do final da coluna */
-    min-height: 0;
-}
-.countdown-item {
-    background: var(--bg-color); padding: 6px 10px; margin-bottom: 5px; border-radius: 4px;
-    display: flex; justify-content: space-between; align-items: center;
-    border: 1px solid transparent; transition: 0.2s;
-}
 .countdown-item .info { display: flex; flex-direction: column; }
-.countdown-item .carrier { color: var(--highlight-color); font-weight: bold; font-size: 0.85em; }
-.countdown-item .time { font-size: 0.7em; color: #888; }
-.countdown-item .timer { font-weight: bold; font-size: 1em; }
+.countdown-item .carrier { color: var(--highlight-color); font-weight: bold; font-size: 0.9em; }
+.countdown-item .time { font-size: 0.75em; color: #888; }
+.countdown-item .timer { font-weight: bold; font-size: 1.1em; }
+
+/* ESTADO: FINALIZADO (Riscado) */
+.countdown-item.finished {
+    opacity: 0.5;
+    background-color: #252525;
+    border: 1px dashed #444;
+}
+.countdown-item.finished .timer {
+    text-decoration: line-through;
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* ESTADO: IMINENTE (Vermelho Pulsante) */
+.countdown-item.imminent {
+    background-color: #3a1c1c; /* Fundo avermelhado escuro */
+    border: 1px solid var(--danger-color);
+    animation: pulse-border 1.5s infinite alternate;
+}
+.countdown-item.imminent .timer {
+    color: #ff6b6b;
+    animation: blink-text 1s infinite;
+}
+
+/* Animações de Pulso */
+@keyframes pulse-border {
+    0% { border-color: rgba(214, 48, 49, 0.4); box-shadow: 0 0 5px rgba(214, 48, 49, 0.2); }
+    100% { border-color: var(--danger-color); box-shadow: 0 0 15px rgba(214, 48, 49, 0.6); }
+}
+@keyframes blink-text {
+    50% { opacity: 0.5; }
+}
 
 /* --- FOOTER (TICKER) --- */
 .news-ticker-container {
-    height: 25px; /* Bem fino */
-    background: var(--card-bg);
-    margin-top: 8px;
-    flex-shrink: 0;
+    height: 25px; background: var(--card-bg); margin-top: 8px; flex-shrink: 0;
     overflow: hidden; display: flex; align-items: center;
 }
 .news-ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 45s linear infinite; }
 .news-ticker p { margin: 0; font-size: 0.85em; color: #ccc; }
 @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
-/* --- RESPONSIVIDADE DE SEGURANÇA --- */
+/* --- RESPONSIVIDADE MOBILE --- */
 @media (max-width: 1024px) {
     html, body { height: auto; overflow: auto; }
     .dashboard-grid { grid-template-columns: 1fr; height: auto; }
-    .column-left, .column-center, .column-right { height: auto; }
-    .widget { height: auto; min-height: 200px; }
+    .totals-widget { flex-direction: column; height: auto; padding: 15px; gap: 10px; }
     .map-widget { height: 350px; }
-    .totals-widget { height: auto; padding: 15px; flex-direction: column; gap: 10px; }
 }
