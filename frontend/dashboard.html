@@ -11,25 +11,24 @@
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <!-- TOPO: Logo (esquerda) | Temperatura + Relógio (direita, lado a lado) -->
-  <header class="dashboard-header" role="banner" aria-label="Cabeçalho do dashboard">
+  
+  <header class="dashboard-header" role="banner">
     <div class="header-left logo-container">
       <img src="./drogavet_neuvye.png" alt="Logo" class="logo-img">
     </div>
 
     <div class="header-right">
-      <!-- Temperatura compacta -->
-      <section class="widget widget--sm weather-widget" aria-label="Clima">
+      <section class="widget widget--sm weather-widget">
         <div class="weather-body top-compact">
-          <img id="weather-icon" alt="Clima" width="48" height="48"/>
+          <img id="weather-icon" alt="Clima" />
           <div class="weather-numbers">
             <div id="temperature">--°C</div>
             <small id="description">...</small>
           </div>
         </div>
       </section>
-      <!-- Relógio compacto -->
-      <section class="widget widget--sm clock-widget" aria-label="Relógio">
+      
+      <section class="widget widget--sm clock-widget">
         <div class="clock-numbers">
           <div id="time"><span id="clock">--:--:--</span></div>
           <small id="date">&nbsp;</small>
@@ -39,6 +38,7 @@
   </header>
 
   <main class="dashboard-grid" role="main">
+    
     <section class="column-left">
       <div class="widget birthday-widget">
         <h2>🎂 Aniversariantes do Mês</h2>
@@ -63,9 +63,9 @@
       <div class="widget map-widget map-widget--large">
         <h2>🗺️ Envios Concluídos por UF</h2>
         <div id="map-container">
-          <svg id="brazil-map-svg" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa do Brasil"></svg>
+          <svg id="brazil-map-svg"></svg>
         </div>
-        <div class="legend" aria-label="Legenda do mapa">
+        <div class="legend">
           <span><span class="swatch" style="background:#333"></span>Baixo</span>
           <span><span class="swatch" style="background:#706b5a"></span>Médio</span>
           <span><span class="swatch" style="background:#A2946A"></span>Alto</span>
@@ -82,7 +82,7 @@
           <div class="total-label">Valor Expedido (R$)</div>
           <div class="total-value" id="valor-total">0,00</div>
         </div>
-        <div class="total-item">
+        <div class="total-item progress-item">
           <div class="total-label">Progresso Geral</div>
           <div id="progress-chart-container">
             <canvas id="progress-chart"></canvas>
@@ -111,14 +111,15 @@
         <div class="chart-container"><canvas id="externas-chart"></canvas></div>
       </div>
 
-      <div class="widget">
+      <div class="widget countdown-widget">
         <h2>⏱️ Próximas Coletas</h2>
         <div id="countdown-container" class="scrollable-content"></div>
       </div>
     </section>
+
   </main>
 
-  <footer class="news-ticker-container" role="contentinfo" aria-label="Comunicados">
+  <footer class="news-ticker-container">
     <div class="news-ticker"><p id="news-content">Carregando comunicados...</p></div>
   </footer>
 
