@@ -1,62 +1,63 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vendas Concluídas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendas Concluídas</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-  <style>
-    body { font-family: sans-serif; background-color: #f4f4f9; margin: 0; padding: 1rem; }
-    .header { margin-bottom: 1rem; } .header a { color: #007bff; text-decoration: none; font-weight: bold; }
-    h1 { color: #333; }
-    .controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; align-items: center; }
-    .controls .search-group { flex-grow: 1; min-width: 200px; }
-    .controls .date-group { display: flex; gap: 0.5rem; align-items: center; }
-    .controls input { padding: 0.8rem; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem; }
-    .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
-    .actions-cell { display: flex; gap: 0.5rem; }
-    .btn { padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px; font-size: 0.9rem; border: none; cursor: pointer; color: white; }
-    .btn-reprint { background-color: #17a2b8; }
-    .btn-revert { background-color: #ffc107; color: #212529; }
-  </style>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; margin: 0; padding: 1rem; }
+        .header { margin-bottom: 1rem; } .header a { color: #007bff; text-decoration: none; font-weight: bold; }
+        h1 { color: #333; }
+        .controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; align-items: center; }
+        .controls .search-group { flex-grow: 1; min-width: 200px; }
+        .controls .date-group { display: flex; gap: 0.5rem; align-items: center; }
+        .controls input { padding: 0.8rem; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem; }
+        .table-container { background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
+        .actions-cell { display: flex; gap: 0.5rem; }
+        .btn { padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px; font-size: 0.9rem; border: none; cursor: pointer; color: white; }
+        .btn-reprint { background-color: #17a2b8; }
+        .btn-revert { background-color: #ffc107; color: #212529; }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <a href="/index.html">&larr; Voltar ao Menu</a>
-    <h1>Vendas Concluídas</h1>
-  </div>
-
-  <div class="controls">
-    <div class="search-group">
-      <input type="text" id="search-input" placeholder="Busque por cliente ou cód. venda..." style="width: 100%;">
+    <div class="header">
+        <a href="/index.html">&larr; Voltar ao Menu</a>
+        <h1>Vendas Concluídas</h1>
     </div>
-    <div class="date-group">
-      <label for="start-date-input">De:</label>
-      <input type="date" id="start-date-input">
-      <label for="end-date-input">Até:</label>
-      <input type="date" id="end-date-input">
-    </div>
-  </div>
 
-  <div class="table-container">
-    <table>
-      <thead><tr><th>Cliente</th><th>Cód. Venda</th><th>Volumes</th><th>Confirmado em</th><th>Ações</th></tr></thead>
-      <tbody id="concluidos-table-body"></tbody>
-    </table>
-  </div>
+    <div class="controls">
+        <div class="search-group">
+            <input type="text" id="search-input" placeholder="Busque por cliente ou cód. venda..." style="width: 100%;">
+        </div>
+        <div class="date-group">
+            <label for="start-date-input">De:</label>
+            <input type="date" id="start-date-input">
+            <label for="end-date-input">Até:</label>
+            <input type="date" id="end-date-input">
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Cliente</th><th>Cód. Venda</th><th>Volumes</th><th>Confirmado em</th><th>Ações</th></tr></thead>
+            <tbody id="concluidos-table-body"></tbody>
+        </table>
+    </div>
 
 <script>
-    // ✅ 2. Inicialização via window.supabase (sem type="module")
+    // ✅ Inicialização corrigida
     const { createClient } = window.supabase;
     
     const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI';
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Uso de supabaseClient
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let concluidosData = [];
     const tableBody = document.getElementById('concluidos-table-body');
@@ -64,20 +65,16 @@
     const startDateInput = document.getElementById('start-date-input');
     const endDateInput = document.getElementById('end-date-input');
 
-    // Função com a correção de fuso horário
     function aplicarFiltros() {
         const query = searchInput.value.toLowerCase();
-        
-        // Pega as datas dos inputs como strings 'YYYY-MM-DD'
         const startDateString = startDateInput.value;
         const endDateString = endDateInput.value;
         
         if (!startDateString || !endDateString) {
-            renderTable([]); // Se não houver data, limpa a tabela
+            renderTable([]); 
             return;
         }
 
-        // CORREÇÃO: Constrói as datas de forma segura, usando o fuso horário local
         const [startYear, startMonth, startDay] = startDateString.split('-').map(Number);
         const startDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0, 0);
 
@@ -98,7 +95,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Verificação de sessão
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { window.location.href = '/login.html'; return; }
         
         const hoje = new Date().toISOString().split('T')[0];
@@ -137,10 +135,10 @@
     async function carregarConcluidos() {
         tableBody.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
         try {
-            // Chamando a Edge Function do Supabase
-            const { data, error } = await supabase.functions.invoke('get-concluidos');
+            // Invocação da function via supabaseClient
+            const { data, error } = await supabaseClient.functions.invoke('get-concluidos');
             if (error) throw error;
-            concluidosData = data.concluidos;
+            concluidosData = data.concluidos || [];
             aplicarFiltros();
         } catch (error) {
             tableBody.innerHTML = `<tr><td colspan="5">Erro ao carregar vendas: ${error.message}</td></tr>`;
@@ -153,11 +151,18 @@
 
         if (target.matches('.btn-revert')) {
             if (confirm('Tem certeza que deseja reverter esta venda para "Pendente"?')) {
+                const originalText = target.textContent;
                 target.textContent = 'Revertendo...';
-                const { error } = await supabase.functions.invoke('reverter-envio', { body: { envio_id: parseInt(vendaId) } });
+                target.disabled = true;
+
+                const { error } = await supabaseClient.functions.invoke('reverter-envio', { 
+                    body: { envio_id: parseInt(vendaId) } 
+                });
+
                 if (error) {
                     alert(`Erro ao reverter: ${error.message}`);
-                    target.textContent = 'Reverter';
+                    target.textContent = originalText;
+                    target.disabled = false;
                 } else {
                     concluidosData = concluidosData.filter(v => v.id != vendaId);
                     aplicarFiltros(); 
@@ -166,10 +171,18 @@
         }
 
         if (target.matches('.btn-reprint')) {
+            const originalText = target.textContent;
             target.textContent = 'Gerando...';
+            target.disabled = true;
+
             try {
-                const { data: htmlString, error } = await supabase.functions.invoke('gerar-etiqueta', { body: { envio_id: parseInt(vendaId) }, responseType: 'text' });
+                const { data: htmlString, error } = await supabaseClient.functions.invoke('gerar-etiqueta', { 
+                    body: { envio_id: parseInt(vendaId) }, 
+                    responseType: 'text' 
+                });
+
                 if (error) throw error;
+
                 const printWindow = window.open('', '_blank');
                 printWindow.document.write(htmlString);
                 printWindow.document.close();
@@ -177,7 +190,8 @@
             } catch (error) {
                 alert(`Erro ao reimprimir: ${error.message}`);
             } finally {
-                target.textContent = 'Reimprimir';
+                target.textContent = originalText;
+                target.disabled = false;
             }
         }
     });
