@@ -48,13 +48,14 @@
   </div>
 
   <script>
-    // ✅ 2. Inicialização via window.supabase (sem type="module")
+    // ✅ Inicialização corrigida via window.supabase
     const { createClient } = window.supabase;
 
     const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI';
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Mudança de nome para evitar SyntaxError: Identifier 'supabase' has already been declared
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // --- SETUP INICIAL ---
     const logDiv = document.getElementById('log');
@@ -78,18 +79,20 @@
         selJanelas.innerHTML = '<option>Carregando…</option>';
         log('Consultando janelas confirmadas…');
 
-        const { data: { session } } = await supabase.auth.getSession();
+        // Uso do supabaseClient aqui
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session?.access_token) {
           log('Sessão expirada. Faça login novamente.');
           location.href = '/login.html';
           return;
         }
         
-        const startOfDay = new Date(startInput.value + 'T00:00:00Z'); // Usando Z para UTC
+        const startOfDay = new Date(startInput.value + 'T00:00:00Z'); 
         const endOfDay = new Date(endInput.value + 'T00:00:00Z');
         endOfDay.setUTCDate(endOfDay.getUTCDate() + 1);
 
-        const { data, error } = await supabase.functions.invoke('get-janelas-para-romaneio', {
+        // Uso do supabaseClient aqui
+        const { data, error } = await supabaseClient.functions.invoke('get-janelas-para-romaneio', {
             body: { 
                 start_date: startOfDay.toISOString(), 
                 end_date: endOfDay.toISOString() 
@@ -133,7 +136,8 @@
             const endOfDay = new Date(endInput.value + 'T00:00:00Z');
             endOfDay.setUTCDate(endOfDay.getUTCDate() + 1);
 
-            const { data: htmlString, error } = await supabase.functions.invoke('gerar-romaneio', {
+            // Uso do supabaseClient aqui
+            const { data: htmlString, error } = await supabaseClient.functions.invoke('gerar-romaneio', {
                 body: { 
                     janela_coleta: janela,
                     start_date: startOfDay.toISOString(),
