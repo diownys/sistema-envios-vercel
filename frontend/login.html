@@ -16,7 +16,7 @@
         input { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         button { width: 100%; padding: 0.9rem; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
         button:hover { background-color: #0056b3; }
-        .error-message { color: #dc3545; margin-top: 1rem; min-height: 1.2em; }
+        .error-message { color: #dc3545; margin-top: 1rem; min-height: 1.2em; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -37,40 +37,45 @@
     </div>
 
     <script>
-        // O Supabase agora está disponível em window.supabase (a correção do TypeError)
+        // O Supabase CDN injeta o objeto 'supabase' em window.
+        // Extraímos a função createClient dele.
         const { createClient } = window.supabase;
 
-        // ⚠️ SUAS CHAVES DE PROJETO
+        // CONFIGURAÇÕES DO PROJETO
         const SUPABASE_URL = 'https://nfsuisftzddegihyhoha.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mc3Vpc2Z0emRkZWdpaHlob2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTcwMDcsImV4cCI6MjA3NDU5MzAwN30.tM_9JQo6ejzOBWKQ9XxT54f8NuM6jSoHomF9c_IfEJI';
 
-        // Inicializa o cliente Supabase
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Inicializa o cliente com um nome diferente para evitar o SyntaxError
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const loginForm = document.getElementById('login-form');
         const errorMessageDiv = document.getElementById('error-message');
 
         loginForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Impede o recarregamento
+            event.preventDefault(); 
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            errorMessageDiv.textContent = ''; // Limpa erros antigos
+            errorMessageDiv.textContent = 'Autenticando...'; 
 
-            // LÓGICA DE LOGIN
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+            try {
+                // LÓGICA DE LOGIN usando o nome da variável corrigido
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
 
-            if (error) {
-                // Exibe a mensagem de erro (pode ser problema de CORS ou credenciais)
-                errorMessageDiv.textContent = 'Falha no login. Verifique as credenciais ou a configuração do domínio (CORS).';
-                console.error('Erro detalhado no login:', error.message);
-            } else {
-                // Se o login for bem-sucedido, redireciona
-                window.location.href = '/index.html';
+                if (error) {
+                    errorMessageDiv.textContent = 'Erro: ' + error.message;
+                    console.error('Erro detalhado:', error.message);
+                } else if (data.user) {
+                    // Sucesso! Redireciona
+                    window.location.href = '/index.html';
+                }
+            } catch (err) {
+                errorMessageDiv.textContent = 'Ocorreu um erro inesperado.';
+                console.error(err);
             }
         });
     </script>
